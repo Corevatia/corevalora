@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.services.coincap_client import CoinCapClient
+from backend.services.coincap_client import CoinCapClient
 import requests
 
 router = APIRouter(prefix="/crypto", tags=["crypto"])
