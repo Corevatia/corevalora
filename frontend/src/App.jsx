@@ -1,8 +1,6 @@
-import CryptoSearchPage from "./pages/CryptoSearchPage";
+import { Dashboard } from "./pages/Dashboard";
 
 export default function App() {
-
-  return (
-      <CryptoSearchPage/>
-  );
+  return <Dashboard/>
 }
+

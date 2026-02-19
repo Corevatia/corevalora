@@ -9,7 +9,7 @@ export function useCryptoprice(name)
         if(!name) return;
 
         fetchCryptoPrice(name)
-            .then(setData);
+            .then(setData).catch(console.error);
   }, [name]);
   return data
 }
