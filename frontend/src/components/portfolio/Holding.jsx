@@ -1,5 +1,5 @@
 
-export default function Holding({asset, amount, currentPrice})
+export default function Holding({asset, symbol , amount, currentPrice})
 {
     const currentvalue = amount * currentPrice;
     return(
@@ -7,6 +7,7 @@ export default function Holding({asset, amount, currentPrice})
         <h3>
             {asset.toUpperCase()}
         </h3>
+        <p>Symbol: {symbol}</p>
         <p>Amount: {amount}</p>
         <p>Value: {currentvalue}$</p>
     </div>

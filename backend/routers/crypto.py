@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from backend.services.coincap_client import CoinCapClient
+from services.coincap_client import CoinCapClient
 import requests
 
 router = APIRouter(prefix="/crypto", tags=["crypto"])
@@ -10,7 +10,8 @@ def get_price(asset_id: str):
     try:
         data = client.get_asset(asset_id)
         price = float(data["data"]["priceUsd"])
-        return {"asset": asset_id, "priceUsd": price}
+        symbol = data["data"]["symbol"]
+        return {"asset": asset_id, "priceUsd": price, "symbol": symbol}
     except requests.HTTPError as e:
         raise HTTPException(status_code=502, detail="Upstream API error")
     except Exception:

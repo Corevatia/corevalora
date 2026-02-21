@@ -11,6 +11,7 @@ export default function Portfolio({holdings, onDelete})
             <div key={h.asset}>
             <Holding
                 asset={h.asset}
+                symbol={h.symbol}
                 amount={h.amount}
                 currentPrice={h.price}
             />

@@ -5,29 +5,38 @@ import { useState } from "react";
 
 
 export default function CryptoSearch({onAddHolding}) {
+  const [inputValue, setInputValue] = useState("")
   const [query, setQuery] = useState("");
-  const data = useCryptoprice(query);
   const [showAdd, setShowAdd] = useState(false);
   const [amount, setAmount] = useState("");
+
+  const data = useCryptoprice(query);
 
   function saveHolding() {
     if (!data?.asset) return;
     const amt = Number(amount);
     if (!Number.isFinite(amt) || amt <= 0) return;
 
-    onAddHolding({asset: data.asset,amount: amt, price: Number(data.priceUsd)})
+    onAddHolding({asset: data.asset, symbol: data.symbol, amount: amt, price: Number(data.priceUsd)})
     
     setAmount("");
     setShowAdd(false);
   }
-
+  function onKeyDown(e)
+  {
+    if (e.key === "Enter")
+    {
+      setQuery(inputValue.trim().toLowerCase());
+    }
+  }
   return (
     <div style={{ padding: 24, fontFamily: "system-ui" }}>
       <h1>CryptoSearch</h1>
 
       <SearchBar
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        onKeyDown={onKeyDown}
       />
 
       <PriceCard asset={data?.asset} price={data?.priceUsd} />

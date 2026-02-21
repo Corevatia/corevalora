@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from backend.routers.crypto import router as crypto_router
+from routers.crypto import router as crypto_router
+from routers.stock import router as stock_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="CoreValora")
@@ -11,3 +12,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(crypto_router)
+app.include_router(stock_router)

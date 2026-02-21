@@ -7,7 +7,7 @@ export function Dashboard()
 {
     const [holdings, setHolding] = useState([])
     
-        function AddHolding({asset,amount,price})
+        function AddHolding({asset,amount,price,symbol})
         {
             const amt = Number(amount);
             const prc = Number(price);
@@ -15,7 +15,7 @@ export function Dashboard()
                 const existing = prev.find(h => h.asset === asset)
                 if (!existing)
                 {
-                return [...prev, {asset: asset, amount: amt, price:prc}]
+                return [...prev, {asset: asset, symbol: symbol, amount: amt, price:prc}]
                 }
                 
                 const newamount = existing.amount + amt;
