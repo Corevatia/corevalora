@@ -1,26 +1,25 @@
-import { useCryptoprice } from "../../features/crypto/hooks.js";
-import { PriceCard } from "./PriceCard.jsx";
-import { SearchBar } from "../shared/SearchBar.jsx";
 import { useState } from "react";
+import { useStockprice } from "../../features/crypto/hooks";
+import { SearchBar } from "../shared/SearchBar";
+import { PriceCard } from "../crypto/PriceCard";
 
-export default function CryptoSearch({ onAddHolding }) {
+export default function StockSearch({ onAddHolding }) {
   const [inputValue, setInputValue] = useState("");
   const [query, setQuery] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [amount, setAmount] = useState("");
 
-  const data = useCryptoprice(query);
+  const data = useStockprice(query);
 
   function saveHolding() {
-    if (!data?.asset) return;
+    if (!data?.symbol) return;
     const amt = Number(amount);
     if (!Number.isFinite(amt) || amt <= 0) return;
-
     onAddHolding({
-      asset: data.asset,
+      asset: data.symbol,
       symbol: data.symbol,
       amount: amt,
-      price: Number(data.priceUsd),
+      price: Number(data.price),
     });
 
     setAmount("");
@@ -33,7 +32,7 @@ export default function CryptoSearch({ onAddHolding }) {
   }
   return (
     <div style={{ padding: 24, fontFamily: "system-ui" }}>
-      <h1>CryptoSearch</h1>
+      <h1>StockSearch</h1>
 
       <SearchBar
         value={inputValue}
@@ -41,12 +40,12 @@ export default function CryptoSearch({ onAddHolding }) {
         onKeyDown={onKeyDown}
       />
 
-      <PriceCard asset={data?.asset} price={data?.priceUsd} />
-      {data?.asset && !showAdd && (
+      <PriceCard asset={data?.symbol} price={data?.price} />
+      {data?.symbol && !showAdd && (
         <button onClick={() => setShowAdd(true)}>Add holding</button>
       )}
 
-      {data?.asset && showAdd && (
+      {data?.symbol && showAdd && (
         <div>
           <input
             value={amount}

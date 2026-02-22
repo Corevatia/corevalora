@@ -8,10 +8,12 @@ dotenv.load_dotenv()
 
 router = APIRouter(prefix="/stock", tags=["stock"])
 client = AlphaVantageClient(api_key=os.getenv("ALPHAVANTAGE_API_KEY"))
-print("KEY:", os.getenv("ALPHAVANTAGE_API_KEY"))
+
 
 @router.get("/price/{symbol}")
 def get_price(symbol: str):
+    if os.getenv("DEV_MODE") == "true":
+        return {"price": 123.45, "symbol": "Crackstock"}
     try:
         data = client.get_asset(symbol)
         price = float(data["Global Quote"]["05. price"])
