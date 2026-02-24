@@ -7,7 +7,7 @@ export function Dashboard() {
   const [holdings, setHolding] = useState([]);
   const [mode, setMode] = useState("crypto");
 
-  function AddHolding({ asset, amount, price, symbol }) {
+  function AddHolding({ asset, amount, price, symbol, exchange, currency }) {
     const amt = Number(amount);
     const prc = Number(price);
     setHolding((prev) => {
@@ -15,7 +15,14 @@ export function Dashboard() {
       if (!existing) {
         return [
           ...prev,
-          { asset: asset, symbol: symbol, amount: amt, price: prc },
+          {
+            asset: asset,
+            symbol: symbol,
+            amount: amt,
+            price: prc,
+            exchange: exchange,
+            currency: currency,
+          },
         ];
       }
 

@@ -11,6 +11,8 @@ export default function Portfolio({ holdings, onDelete }) {
             symbol={h.symbol}
             amount={h.amount}
             currentPrice={h.price}
+            exchange={h.exchange}
+            currency={h.currency}
           />
           <button onClick={() => onDelete({ asset: h.asset })}>delete</button>
         </div>

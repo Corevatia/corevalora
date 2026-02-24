@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException
-from services.coincap_client import CoinCapClient
+from services.providers.coincap_client import CoinCapClient
 import requests
 
 router = APIRouter(prefix="/crypto", tags=["crypto"])
 client = CoinCapClient(api_key=None)  # später aus .env laden
+
 
 @router.get("/price/{asset_id}")
 def get_price(asset_id: str):

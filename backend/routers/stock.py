@@ -1,42 +1,22 @@
 from fastapi import APIRouter, HTTPException
-from services.alphavantage_client import AlphaVantageClient
-from services.marketstack_client import MarketStackClient
+from models.stock import StockQuote, StockInfo
+from services.stock_service import get_stock_price, get_stock_info
 import requests
-import dotenv
-import os
-
-dotenv.load_dotenv()
 
 router = APIRouter(prefix="/stock", tags=["stock"])
-client = MarketStackClient(api_key=os.getenv("MARKETSTACK_API_KEY"))
 
 
-@router.get("/price/{symbol}")
-def get_price(symbol: str):
-    if os.getenv("DEV_MODE") == "true":
-        return {"price": 123.45, "symbol": "stockXY"}
+@router.get("/price/{symbol}", response_model=StockQuote)
+def stock_price(symbol: str):
     try:
-        data = client.get_asset(symbol)
-        price = float(data["data"][0]["close"])
-        symbol = data["data"][0]["symbol"]
-        return {"price": price, "symbol": symbol}
-    except requests.HTTPError as e:
-        raise HTTPException(status_code=502, detail="Upstream API error")
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid asset id or response")
+        return get_stock_price(symbol)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
-# clientAlphaVantage = AlphaVantageClient(api_key=os.getenv("ALPHAVANTAGE_API_KEY"))
 
-# @router.get("/price/{symbol}")
-# def get_price_alphavantage(symbol: str):
-#     if os.getenv("DEV_MODE") == "true":
-#         return {"price": 123.45, "symbol": "stockXY"}
-#     try:
-#         data = clientAlphaVantage.get_asset(symbol)
-#         price = float(data["Global Quote"]["05. price"])
-#         symbol = data["Global Quote"]["01. symbol"]
-#         return {"price": price, "symbol": symbol}
-#     except requests.HTTPError as e:
-#         raise HTTPException(status_code=502, detail="Upstream API error")
-#     except Exception:
-#         raise HTTPException(status_code=400, detail="Invalid asset id or response")
+@router.get("/info/{symbol}", response_model=StockInfo)
+def stock_info(symbol: str, exchange: str):
+    try:
+        return get_stock_info(symbol, exchange)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))

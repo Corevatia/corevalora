@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchCryptoPrice, fetchStockPrice } from "./api";
+import { fetchCryptoPrice, fetchStockInfo, fetchStockPrice } from "./api";
 
 export function useCryptoprice(name) {
   const [data, setData] = useState(null);
@@ -19,5 +19,15 @@ export function useStockprice(symbol) {
 
     fetchStockPrice(symbol).then(setData).catch(console.error);
   }, [symbol]);
+  return data;
+}
+export function useStockinfo(symbol, exchange) {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    if (!symbol || !exchange) return;
+
+    fetchStockInfo(symbol, exchange).then(setData).catch(console.error);
+  }, [symbol, exchange]);
   return data;
 }

@@ -1,4 +1,4 @@
-import { useCryptoprice } from "../../features/crypto/hooks.js";
+import { useCryptoprice } from "../../features/hooks.js";
 import { PriceCard } from "./PriceCard.jsx";
 import { SearchBar } from "../shared/SearchBar.jsx";
 import { useState } from "react";
