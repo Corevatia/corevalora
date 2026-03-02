@@ -1,22 +1,37 @@
 from fastapi import APIRouter, HTTPException
-from models.stock import StockQuote, StockInfo
-from services.stock_service import get_stock_price, get_stock_info
+from models.stock import Stock, SearchResult
+import services.stock_service as service
+from typing import List
 import requests
 
 router = APIRouter(prefix="/stock", tags=["stock"])
 
 
-@router.get("/price/{symbol}", response_model=StockQuote)
+@router.get("/eod_price/{symbol}", response_model=Stock)
 def stock_price(symbol: str):
     try:
-        return get_stock_price(symbol)
+        return service.get_price(symbol)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except requests.HTTPError as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
 
-@router.get("/info/{symbol}", response_model=StockInfo)
-def stock_info(symbol: str, exchange: str):
+@router.get("/search/{query}", response_model=List[SearchResult])
+def stock_search(query: str):
     try:
-        return get_stock_info(symbol, exchange)
+        return service.get_stock_search(query)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except requests.HTTPError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
+
+@router.get("/search/backup/{query}", response_model=List[SearchResult])
+def stock_search_backup(query: str, ):
+    try:
+        return service.search_backup(query)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except requests.HTTPError as e:
+        raise HTTPException(status_code=503, detail=str(e))

@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { fetchCryptoPrice, fetchStockInfo, fetchStockPrice } from "./api";
+import {
+  fetchCryptoPrice,
+  fetchStockSearch,
+  fetchStockEOD,
+  fetchStockSearchBackup,
+} from "./api";
 
 export function useCryptoprice(name) {
   const [data, setData] = useState(null);
@@ -17,17 +22,27 @@ export function useStockprice(symbol) {
   useEffect(() => {
     if (!symbol) return;
 
-    fetchStockPrice(symbol).then(setData).catch(console.error);
+    fetchStockEOD(symbol).then(setData).catch(console.error);
   }, [symbol]);
   return data;
 }
-export function useStockinfo(symbol, exchange) {
+export function useStockSearch(query) {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    if (!symbol || !exchange) return;
+    if (!query) return;
 
-    fetchStockInfo(symbol, exchange).then(setData).catch(console.error);
-  }, [symbol, exchange]);
+    fetchStockSearch(query).then(setData).catch(console.error);
+  }, [query]);
+  return data;
+}
+export function useStockSearchBackup(query, enabled = false) {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    if (!enabled || !query) return;
+
+    fetchStockSearchBackup(query).then(setData).catch(console.error);
+  }, [enabled, query]);
   return data;
 }

@@ -4,11 +4,16 @@ export function fetchCryptoPrice(name) {
   const response = request(`/crypto/price/${name}`);
   return response;
 }
-export function fetchStockPrice(symbol) {
-  const response = request(`/stock/price/${symbol}`);
+
+export function fetchStockEOD(symbol) {
+  const response = request(`/stock/eod_price/${symbol}`);
   return response;
 }
-export function fetchStockInfo(symbol, exchange) {
-  const response = request(`/stock/info/${symbol}?exchange=${exchange}`);
+export function fetchStockSearch(query) {
+  const response = request(`/stock/search/${query}`);
+  return response;
+}
+export function fetchStockSearchBackup(query) {
+  const response = request(`/stock/search/backup/${query}`);
   return response;
 }

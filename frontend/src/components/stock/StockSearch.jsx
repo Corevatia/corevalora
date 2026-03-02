@@ -1,30 +1,38 @@
 import { useState } from "react";
-import { useStockinfo, useStockprice } from "../../features/hooks";
+import {
+  useStockSearch,
+  useStockSearchBackup,
+  useStockprice,
+} from "../../features/hooks";
 import { SearchBar } from "../shared/SearchBar";
-import { PriceCard } from "../crypto/PriceCard";
+import SearchResult from "./SearchResult";
+import StockData from "./StockData";
 
 export default function StockSearch({ onAddHolding }) {
   const [inputValue, setInputValue] = useState("");
   const [query, setQuery] = useState("");
   const [showAdd, setShowAdd] = useState(false);
   const [amount, setAmount] = useState("");
+  const [stockSymbol, setStockSymbol] = useState("");
+  const [showSearch, setShowSearch] = useState(true);
+  const [extendedSearch, setExtendedSearch] = useState(false);
 
-  const pricedata = useStockprice(query);
-  const infodata = useStockinfo(query, pricedata?.exchange);
+  const searchdata = useStockSearch(query);
+  const extendsearchdata = useStockSearchBackup(query, extendedSearch);
+  const stockdata = useStockprice(stockSymbol);
 
   function saveHolding() {
-    console.debug(pricedata.exchange);
-    console.debug(infodata.name);
-    if (!pricedata?.symbol) return;
+    if (!stockdata?.symbol) return;
     const amt = Number(amount);
     if (!Number.isFinite(amt) || amt <= 0) return;
     onAddHolding({
-      asset: infodata.name,
-      symbol: pricedata.symbol,
+      asset: stockdata.name,
+      symbol: stockdata.symbol,
       amount: amt,
-      price: Number(pricedata.price),
-      exchange: pricedata.exchange,
-      currency: infodata.currency,
+      date: stockdata.date,
+      price: Number(stockdata.price),
+      exchange: stockdata.exchange,
+      currency: stockdata.currency,
     });
 
     setAmount("");
@@ -32,7 +40,8 @@ export default function StockSearch({ onAddHolding }) {
   }
   function onKeyDown(e) {
     if (e.key === "Enter") {
-      setQuery(inputValue.trim().toLowerCase());
+      setExtendedSearch(false);
+      setQuery(inputValue.trim());
     }
   }
   return (
@@ -45,12 +54,71 @@ export default function StockSearch({ onAddHolding }) {
         onKeyDown={onKeyDown}
       />
 
-      <PriceCard asset={pricedata?.symbol} price={pricedata?.price} />
-      {pricedata?.symbol && !showAdd && (
-        <button onClick={() => setShowAdd(true)}>Add holding</button>
+      <h2>SearchResults:</h2>
+      {showSearch &&
+        searchdata?.map((r) => (
+          <div key={r.symbol}>
+            <SearchResult
+              name={r.name}
+              symbol={r.symbol}
+              exchange={r.exchange}
+              mic={r.mic}
+            />
+            {!showAdd && (
+              <button
+                onClick={() => {
+                  setShowAdd(true);
+                  setStockSymbol(r.symbol);
+                  setShowSearch(false);
+                }}
+              >
+                Add Holding
+              </button>
+            )}
+          </div>
+        ))}
+      {showSearch &&
+        extendsearchdata?.map((r) => (
+          <div key={r.symbol}>
+            <SearchResult
+              name={r.name}
+              symbol={r.symbol}
+              exchange={r.exchange}
+              mic={r.mic}
+            />
+            {!showAdd && (
+              <button
+                onClick={() => {
+                  setShowAdd(true);
+                  setStockSymbol(r.symbol);
+                  setShowSearch(false);
+                }}
+              >
+                Add Holding
+              </button>
+            )}
+          </div>
+        ))}
+      {showSearch && !extendedSearch && (
+        <button
+          onClick={() => {
+            setExtendedSearch(true);
+          }}
+        >
+          Extend Search
+        </button>
       )}
-
-      {pricedata?.symbol && showAdd && (
+      {!showSearch && (
+        <StockData
+          asset={stockdata?.name}
+          symbol={stockdata?.symbol}
+          date={stockdata?.date}
+          currentPrice={stockdata?.price}
+          exchange={stockdata?.exchange}
+          currency={stockdata?.currency}
+        />
+      )}
+      {!showSearch && showAdd && (
         <div>
           <input
             value={amount}

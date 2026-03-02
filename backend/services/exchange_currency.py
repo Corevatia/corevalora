@@ -6,8 +6,6 @@ EXCHANGE_CURRENCY = {
     "XASE": "USD",  # NYSE American
     "ARCX": "USD",  # NYSE Arca
     "IEXG": "USD",  # IEX
-    "XCBO": "USD",  # CBOE
-    "OTCM": "USD",  # OTC Markets
 
     # Switzerland
     "XSWX": "CHF",  # SIX Swiss Exchange
@@ -102,9 +100,6 @@ EXCHANGE_CURRENCY = {
 
     # Qatar
     "DSMD": "QAR",
-
-    # Russia
-    "MISX": "RUB",
 
     # Saudi
     "XSAU": "SAR",

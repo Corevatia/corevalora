@@ -1,5 +1,6 @@
 import requests
-from debug.upstream_debug import upstream_debug
+
+from core.upstream_error_handling import upstream_error_handling
 
 
 class AlphaVantageClient:
@@ -12,6 +13,6 @@ class AlphaVantageClient:
         r = self.session.get(self.baseurl,
                              params={"function": "GLOBAL_QUOTE", "symbol": symbol, "apikey": self.api_key}, timeout=3)
 
-        upstream_debug(r)
+        upstream_error_handling(r)
 
         return r.json()

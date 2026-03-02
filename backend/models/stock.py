@@ -1,13 +1,17 @@
 from pydantic import BaseModel
 
 
-class StockInfo(BaseModel):
+class SearchResult(BaseModel):
     name: str
-    currency: str
+    symbol: str
+    exchange: str
+    mic: str
 
 
-class StockQuote(BaseModel):
+class Stock(BaseModel):
     symbol: str
     price: float
     date: str
     exchange: str
+    name: str
+    currency: str

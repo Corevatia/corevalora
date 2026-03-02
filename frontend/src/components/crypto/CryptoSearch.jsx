@@ -1,5 +1,5 @@
 import { useCryptoprice } from "../../features/hooks.js";
-import { PriceCard } from "./PriceCard.jsx";
+import { PriceCard } from "../shared/PriceCard.jsx";
 import { SearchBar } from "../shared/SearchBar.jsx";
 import { useState } from "react";
 
@@ -43,7 +43,7 @@ export default function CryptoSearch({ onAddHolding }) {
 
       <PriceCard asset={data?.asset} price={data?.priceUsd} />
       {data?.asset && !showAdd && (
-        <button onClick={() => setShowAdd(true)}>Add holding</button>
+        <button onClick={() => setShowAdd(true)}>Add Holding</button>
       )}
 
       {data?.asset && showAdd && (

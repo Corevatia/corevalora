@@ -5,9 +5,17 @@ import StockSearch from "../components/stock/StockSearch";
 
 export function Dashboard() {
   const [holdings, setHolding] = useState([]);
-  const [mode, setMode] = useState("crypto");
+  const [mode, setMode] = useState("stock");
 
-  function AddHolding({ asset, amount, price, symbol, exchange, currency }) {
+  function AddHolding({
+    asset,
+    symbol,
+    amount,
+    date,
+    price,
+    exchange,
+    currency,
+  }) {
     const amt = Number(amount);
     const prc = Number(price);
     setHolding((prev) => {
@@ -19,6 +27,7 @@ export function Dashboard() {
             asset: asset,
             symbol: symbol,
             amount: amt,
+            date: date,
             price: prc,
             exchange: exchange,
             currency: currency,
