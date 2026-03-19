@@ -4,6 +4,7 @@ import {
   fetchStockSearch,
   fetchStockEOD,
   fetchStockSearchBackup,
+  fetchCurrencyRate,
 } from "./api";
 
 export function useCryptoprice(name) {
@@ -44,5 +45,15 @@ export function useStockSearchBackup(query, enabled = false) {
 
     fetchStockSearchBackup(query).then(setData).catch(console.error);
   }, [enabled, query]);
+  return data;
+}
+export function useCurrencyRate(baseCurrency) {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    if (!baseCurrency) return;
+
+    fetchCurrencyRate(baseCurrency).then(setData).catch(console.error);
+  }, [baseCurrency]);
   return data;
 }

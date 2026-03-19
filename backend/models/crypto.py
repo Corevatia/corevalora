@@ -1,7 +1,9 @@
 from pydantic import BaseModel
 
 
-class CryptoQuote(BaseModel):
+class Crypto(BaseModel):
     symbol: str
+    name: str
     price: float
+    currency: str
     date: str

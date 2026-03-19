@@ -1,4 +1,4 @@
-from services.exchange_currency import EXCHANGE_CURRENCY
+from services.currency.exchange_currency import EXCHANGE_CURRENCY
 
 SUPPORTED_MICS = set(EXCHANGE_CURRENCY.keys())
 

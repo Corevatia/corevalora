@@ -1,6 +1,6 @@
 from pygments.lexers import data
 import models.stock as stock
-from services.exchange_currency import get_exchange_currency
+from services.currency.exchange_currency import get_exchange_currency
 from services.providers.marketstack_client import MarketStackClient
 import dotenv
 import os
@@ -70,9 +70,9 @@ def get_price(symbol: str) -> stock.Stock | None:
             return stock.Stock(
                 symbol=p["symbol"],
                 price=float(p["close"]),
-                date=p["date"][:10] if isinstance(p.get("date"), str) else p["date"],
+                date=p["date"][:10],
                 exchange=p["exchange"],
-                name=info_rows[0]["name"] if info_rows else symbol,
+                name=info_rows[0]["name"],
                 currency=get_exchange_currency(p["exchange"]),
             )
         except requests.HTTPError as e:

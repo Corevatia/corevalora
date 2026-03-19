@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from routers.crypto import router as crypto_router
 from routers.stock import router as stock_router
+from routers.currency import router as currency_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="CoreValora")
@@ -13,3 +14,4 @@ app.add_middleware(
 )
 app.include_router(crypto_router)
 app.include_router(stock_router)
+app.include_router(currency_router)

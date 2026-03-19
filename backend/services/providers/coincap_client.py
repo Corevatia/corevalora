@@ -1,5 +1,4 @@
 import requests
-
 from core.upstream_error_handling import upstream_error_handling
 
 

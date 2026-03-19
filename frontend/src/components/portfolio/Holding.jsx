@@ -13,11 +13,14 @@ export default function Holding({
       <h3>{asset}</h3>
       <p>Symbol: {symbol}</p>
       <p>Amount: {amount}</p>
-      <p>Value: {currentvalue}$</p>
+      <p>
+        Value: {currentvalue}
+        {currency}
+      </p>
 
-      {exchange && <p>Last Update: {date}</p>}
+      <p>Last Update: {date}</p>
       {exchange && <p>Exchange: {exchange}</p>}
-      {currency && <p>Currency: {currency}</p>}
+      <p>Currency: {currency}</p>
     </div>
   );
 }

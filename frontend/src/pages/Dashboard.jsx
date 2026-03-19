@@ -2,6 +2,7 @@ import { useState } from "react";
 import Portfolio from "../components/portfolio/Portfolio";
 import CryptoSearch from "../components/crypto/CryptoSearch";
 import StockSearch from "../components/stock/StockSearch";
+import PortfolioStats from "../components/portfolio/PorfolioStats";
 
 export function Dashboard() {
   const [holdings, setHolding] = useState([]);
@@ -83,6 +84,16 @@ export function Dashboard() {
         }}
       >
         <Portfolio holdings={holdings} onDelete={DeleteHolding} />
+      </div>
+      <div
+        style={{
+          width: "400px",
+          overflow: "auto",
+          borderRight: "1px solid #ddd",
+          borderLeft: "1px solid #ddd",
+        }}
+      >
+        <PortfolioStats holdings={holdings}></PortfolioStats>
       </div>
     </div>
   );

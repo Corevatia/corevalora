@@ -1,19 +1,16 @@
 from fastapi import APIRouter, HTTPException
-from services.providers.coincap_client import CoinCapClient
+import services.crypto_service as service
 import requests
 
+from models.crypto import Crypto
+
 router = APIRouter(prefix="/crypto", tags=["crypto"])
-client = CoinCapClient(api_key=None)  # später aus .env laden
 
-
-@router.get("/price/{asset_id}")
+@router.get("/price/{asset_id}", response_model=Crypto)
 def get_price(asset_id: str):
     try:
-        data = client.get_asset(asset_id)
-        price = float(data["data"]["priceUsd"])
-        symbol = data["data"]["symbol"]
-        return {"asset": asset_id, "priceUsd": price, "symbol": symbol}
+        return service.get_crypto_price(asset_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except requests.HTTPError as e:
-        raise HTTPException(status_code=502, detail="Upstream API error")
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid asset id or response")
+        raise HTTPException(status_code=503, detail=str(e))

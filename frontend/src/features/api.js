@@ -17,3 +17,7 @@ export function fetchStockSearchBackup(query) {
   const response = request(`/stock/search/backup/${query}`);
   return response;
 }
+export function fetchCurrencyRate(baseCurrency) {
+  const response = request(`/currency/rates/${baseCurrency}`);
+  return response;
+}

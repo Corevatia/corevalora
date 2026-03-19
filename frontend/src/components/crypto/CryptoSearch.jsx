@@ -12,15 +12,17 @@ export default function CryptoSearch({ onAddHolding }) {
   const data = useCryptoprice(query);
 
   function saveHolding() {
-    if (!data?.asset) return;
+    if (!data?.symbol) return;
     const amt = Number(amount);
     if (!Number.isFinite(amt) || amt <= 0) return;
 
     onAddHolding({
-      asset: data.asset,
+      asset: data.name,
       symbol: data.symbol,
       amount: amt,
-      price: Number(data.priceUsd),
+      price: Number(data.price),
+      date: data.date,
+      currency: data.currency,
     });
 
     setAmount("");
@@ -41,12 +43,12 @@ export default function CryptoSearch({ onAddHolding }) {
         onKeyDown={onKeyDown}
       />
 
-      <PriceCard asset={data?.asset} price={data?.priceUsd} />
-      {data?.asset && !showAdd && (
+      <PriceCard asset={data?.name} price={data?.price} />
+      {data?.name && !showAdd && (
         <button onClick={() => setShowAdd(true)}>Add Holding</button>
       )}
 
-      {data?.asset && showAdd && (
+      {data?.name && showAdd && (
         <div>
           <input
             value={amount}

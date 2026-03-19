@@ -89,20 +89,12 @@ EXCHANGE_CURRENCY = {
     # Thailand
     "XBKK": "THB",
 
-    # Taiwan
-    "XTAI": "TWD",
 
     # Turkey
     "XIST": "TRY",
 
     # New Zealand
     "XNZE": "NZD",
-
-    # Qatar
-    "DSMD": "QAR",
-
-    # Saudi
-    "XSAU": "SAR",
 }
 
 
