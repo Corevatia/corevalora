@@ -9,9 +9,11 @@ export default function PortfolioStats({ holdings }) {
 
   let value = 0;
   holdings.map((h) => {
+    if (!ratedata) return <p>Lädt...</p>;
     const currencyrate = ratedata.rates.find(
       (r) => r.exchange_currency === h.currency,
     );
+    if (!currencyrate) return null;
     value = value + (h.price * h.amount) / currencyrate.rate;
   });
   return (

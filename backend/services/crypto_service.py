@@ -1,14 +1,13 @@
-import dotenv
 from services.providers.coincap_client import CoinCapClient
-import os
 import models.crypto as crypto
 from datetime import datetime
+from core.config import settings
 
-dotenv.load_dotenv()
-client = CoinCapClient(api_key=os.getenv("COINCAP_KEY"))
+client = CoinCapClient(api_key=settings.COINCAP_API_KEY)
+
 
 def get_crypto_price(asset_id: str):
-    if os.getenv("DEV_MODE") == "true":
+    if settings.DEV_MODE:
         return crypto.Crypto(
             symbol="XYC",
             name="XYCoin",
