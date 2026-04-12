@@ -5,8 +5,9 @@ import {
   useStockprice,
 } from "../../features/hooks";
 import { SearchBar } from "../shared/SearchBar";
-import SearchResult from "./SearchResult";
 import StockData from "./StockData";
+import StockSearchResults from "./StockSearchResults";
+import AddHoldingForm from "./AddHoldingForm";
 
 export default function StockSearch({ onAddHolding }) {
   const [inputValue, setInputValue] = useState("");
@@ -18,7 +19,11 @@ export default function StockSearch({ onAddHolding }) {
   const [extendedSearch, setExtendedSearch] = useState(false);
 
   const searchdata = useStockSearch(query);
-  const extendsearchdata = useStockSearchBackup(query, extendedSearch);
+  const rawExtendedsearchdata = useStockSearchBackup(query, extendedSearch);
+  const existingSymbols = new Set((searchdata ?? []).map((r) => r.symbol));
+  const extendedsearchdata = (rawExtendedsearchdata ?? []).filter(
+    (r) => !existingSymbols.has(r.symbol),
+  );
   const stockdata = useStockprice(stockSymbol);
 
   function saveHolding() {
@@ -37,12 +42,28 @@ export default function StockSearch({ onAddHolding }) {
 
     setAmount("");
     setShowAdd(false);
+    setShowSearch(true);
   }
   function onKeyDown(e) {
     if (e.key === "Enter") {
       setExtendedSearch(false);
       setQuery(inputValue.trim());
     }
+  }
+  function Select(symbol) {
+    setShowAdd(true);
+    setStockSymbol(symbol);
+    setShowSearch(false);
+  }
+  function Extend() {
+    setExtendedSearch(true);
+  }
+  function Confirm() {
+    saveHolding();
+  }
+  function AmountChange(value) {
+    setAmount(value);
+    setExtendedSearch(false);
   }
   return (
     <div style={{ padding: 24, fontFamily: "system-ui" }}>
@@ -54,80 +75,22 @@ export default function StockSearch({ onAddHolding }) {
         onKeyDown={onKeyDown}
       />
 
-      <h2>SearchResults:</h2>
       {showSearch &&
-        searchdata?.map((r) => (
-          <div key={r.symbol}>
-            <SearchResult
-              name={r.name}
-              symbol={r.symbol}
-              exchange={r.exchange}
-              mic={r.mic}
-            />
-            {!showAdd && (
-              <button
-                onClick={() => {
-                  setShowAdd(true);
-                  setStockSymbol(r.symbol);
-                  setShowSearch(false);
-                }}
-              >
-                Add Holding
-              </button>
-            )}
-          </div>
-        ))}
-      {showSearch &&
-        extendsearchdata?.map((r) => (
-          <div key={r.symbol}>
-            <SearchResult
-              name={r.name}
-              symbol={r.symbol}
-              exchange={r.exchange}
-              mic={r.mic}
-            />
-            {!showAdd && (
-              <button
-                onClick={() => {
-                  setShowAdd(true);
-                  setStockSymbol(r.symbol);
-                  setShowSearch(false);
-                }}
-              >
-                Add Holding
-              </button>
-            )}
-          </div>
-        ))}
-      {showSearch && !extendedSearch && (
-        <button
-          onClick={() => {
-            setExtendedSearch(true);
-          }}
-        >
-          Extend Search
-        </button>
-      )}
-      {!showSearch && (
-        <StockData
-          asset={stockdata?.name}
-          symbol={stockdata?.symbol}
-          date={stockdata?.date}
-          currentPrice={stockdata?.price}
-          exchange={stockdata?.exchange}
-          currency={stockdata?.currency}
-        />
-      )}
-      {!showSearch && showAdd && (
-        <div>
-          <input
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Amount (e.g. 0.5)"
-          />
-          <button onClick={saveHolding}>Confirm</button>
-        </div>
-      )}
+        StockSearchResults({
+          searchdata: searchdata,
+          extendedsearchdata: extendedsearchdata,
+          extendedSearch: extendedSearch,
+          showAdd: showAdd,
+          onExtend: Extend,
+          onSelect: Select,
+        })}
+      {!showSearch &&
+        AddHoldingForm({
+          stockdata: stockdata,
+          onConfirm: Confirm,
+          amount: amount,
+          onAmountChange: AmountChange,
+        })}
     </div>
   );
 }
