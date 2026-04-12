@@ -6,7 +6,7 @@ export async function request(path, options = {}) {
 
   externalSignal?.addEventListener("abort", () => controller.abort());
 
-  const timeoutId = setTimeout(() => controller.abort, timeout);
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
   try {
     const response = await fetch(BASE_URL + path, {
       ...fetchOptions,

@@ -5,7 +5,6 @@ import {
   useStockprice,
 } from "../../features/hooks";
 import { SearchBar } from "../shared/SearchBar";
-import StockData from "./StockData";
 import StockSearchResults from "./StockSearchResults";
 import AddHoldingForm from "./AddHoldingForm";
 
@@ -18,13 +17,25 @@ export default function StockSearch({ onAddHolding }) {
   const [showSearch, setShowSearch] = useState(true);
   const [extendedSearch, setExtendedSearch] = useState(false);
 
-  const searchdata = useStockSearch(query);
-  const rawExtendedsearchdata = useStockSearchBackup(query, extendedSearch);
+  const {
+    data: searchdata,
+    loading: searchloading,
+    error: searchError,
+  } = useStockSearch(query);
+  const {
+    data: rawExtendedsearchdata,
+    loading: extendedSearchLoading,
+    error: extendedSearchError,
+  } = useStockSearchBackup(query, extendedSearch);
   const existingSymbols = new Set((searchdata ?? []).map((r) => r.symbol));
   const extendedsearchdata = (rawExtendedsearchdata ?? []).filter(
     (r) => !existingSymbols.has(r.symbol),
   );
-  const stockdata = useStockprice(stockSymbol);
+  const {
+    data: stockdata,
+    loading: stockDataLoading,
+    error: stockDataError,
+  } = useStockprice(stockSymbol);
 
   function saveHolding() {
     if (!stockdata?.symbol) return;
@@ -78,6 +89,10 @@ export default function StockSearch({ onAddHolding }) {
       {showSearch &&
         StockSearchResults({
           searchdata: searchdata,
+          loading: searchloading,
+          error: searchError,
+          extendedloading: extendedSearchLoading,
+          extendederror: extendedSearchError,
           extendedsearchdata: extendedsearchdata,
           extendedSearch: extendedSearch,
           showAdd: showAdd,
@@ -87,6 +102,8 @@ export default function StockSearch({ onAddHolding }) {
       {!showSearch &&
         AddHoldingForm({
           stockdata: stockdata,
+          loading: stockDataLoading,
+          error: stockDataError,
           onConfirm: Confirm,
           amount: amount,
           onAmountChange: AmountChange,

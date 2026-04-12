@@ -2,7 +2,7 @@ import { useState } from "react";
 import Portfolio from "../components/portfolio/Portfolio";
 import CryptoSearch from "../components/crypto/CryptoSearch";
 import StockSearch from "../components/stock/StockSearch";
-import PortfolioStats from "../components/portfolio/PorfolioStats";
+import PortfolioStats from "../components/portfolio/PortfolioStats";
 
 export function Dashboard() {
   const [holdings, setHolding] = useState([]);

@@ -3,13 +3,12 @@ import { useCurrencyRate } from "../../features/hooks";
 export default function PortfolioStats({ holdings }) {
   const [selectedCurrency, setSelectedCurrency] = useState("EUR");
 
-  const ratedata = useCurrencyRate(selectedCurrency);
+  const { data: ratedata, loading, error } = useCurrencyRate(selectedCurrency);
 
-  const currencies = ratedata?.rates.map((r) => r.exchange_currency) || [];
+  const currencies = ratedata?.rates?.map((r) => r.exchange_currency) || [];
 
   let value = 0;
   holdings.map((h) => {
-    if (!ratedata) return <p>Loading</p>;
     const currencyrate = ratedata.rates.find(
       (r) => r.exchange_currency === h.currency,
     );
@@ -18,6 +17,8 @@ export default function PortfolioStats({ holdings }) {
   });
   return (
     <div>
+      {loading && <p>Loading...</p>}
+      {error && <p>ERROR</p>}
       <select
         value={selectedCurrency}
         onChange={(e) => setSelectedCurrency(e.target.value)}

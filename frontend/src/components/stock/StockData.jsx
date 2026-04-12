@@ -10,10 +10,12 @@ export default function StockData({
     <div>
       <h3>{asset}</h3>
       <p>Symbol: {symbol}</p>
-      <p>Price: {currentPrice}$</p>
+      <p>
+        Price: {currentPrice}
+        {currency}
+      </p>
       <p>Last Update: {date}</p>
       <p>Exchange: {exchange}</p>
-      <p>Currency: {currency}</p>
     </div>
   );
 }

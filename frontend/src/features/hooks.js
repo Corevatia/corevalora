@@ -7,97 +7,46 @@ import {
   fetchCurrencyRate,
 } from "./api";
 
-export function useCryptoprice(name) {
-  const [data, setData] = useState(null);
+function useFetch(fetchFn, param, enabled = true) {
+  const [state, setState] = useState({
+    data: null,
+    error: null,
+    resolvedKey: null,
+  });
+
+  const active = Boolean(enabled && param);
+  const loading = active && state.resolvedKey !== param;
 
   useEffect(() => {
-    if (!name) return;
+    if (!active) return;
 
     const controller = new AbortController();
 
-    fetchCryptoPrice(name, { signal: controller.signal })
-      .then(setData)
+    fetchFn(param, { signal: controller.signal })
+      .then((data) => {
+        setState({ data, error: null, resolvedKey: param });
+      })
       .catch((err) => {
-        if (err.name !== "AbortError") console.error(err);
+        if (err.name !== "AbortError") {
+          console.error(err);
+          setState((prev) => ({ ...prev, error: err, resolvedKey: param }));
+        }
       });
 
     return () => controller.abort();
-  }, [name]);
-  return data;
+  }, [active, param, fetchFn]);
+
+  return { data: state.data, loading, error: state.error };
 }
 
-export function useStockprice(symbol) {
-  const [data, setData] = useState(null);
+export const useCryptoprice = (name) => useFetch(fetchCryptoPrice, name);
 
-  useEffect(() => {
-    if (!symbol) return;
+export const useStockprice = (symbol) => useFetch(fetchStockEOD, symbol);
 
-    const controller = new AbortController();
+export const useStockSearch = (query) => useFetch(fetchStockSearch, query);
 
-    fetchStockEOD(symbol, { signal: controller.signal })
-      .then(setData)
-      .catch((err) => {
-        if (err.name !== "AbortError") console.error(err);
-      });
+export const useStockSearchBackup = (query, enabled = false) =>
+  useFetch(fetchStockSearchBackup, query, enabled);
 
-    return () => controller.abort();
-  }, [symbol]);
-  return data;
-}
-
-export function useStockSearch(query) {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    if (!query) return;
-
-    const controller = new AbortController();
-
-    fetchStockSearch(query, { signal: controller.signal })
-      .then(setData)
-      .catch((err) => {
-        if (err.name !== "AbortError") console.error(err);
-      });
-
-    return () => controller.abort();
-  }, [query]);
-  return data;
-}
-
-export function useStockSearchBackup(query, enabled = false) {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    if (!enabled || !query) return;
-
-    const controller = new AbortController();
-
-    fetchStockSearchBackup(query, { signal: controller.signal })
-      .then(setData)
-      .catch((err) => {
-        if (err.name !== "AbortError") console.error(err);
-      });
-
-    return () => controller.abort();
-  }, [enabled, query]);
-  return data;
-}
-
-export function useCurrencyRate(baseCurrency) {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    if (!baseCurrency) return;
-
-    const controller = new AbortController();
-
-    fetchCurrencyRate(baseCurrency, { signal: controller.signal })
-      .then(setData)
-      .catch((err) => {
-        if (err.name !== "AbortError") console.error(err);
-      });
-
-    return () => controller.abort();
-  }, [baseCurrency]);
-  return data;
-}
+export const useCurrencyRate = (baseCurrency) =>
+  useFetch(fetchCurrencyRate, baseCurrency);

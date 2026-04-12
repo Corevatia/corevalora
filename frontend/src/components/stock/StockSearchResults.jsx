@@ -2,6 +2,10 @@ import SearchResult from "./SearchResult";
 
 export default function StockSearchResults({
   searchdata,
+  loading,
+  error,
+  extendedloading,
+  extendederror,
   extendedsearchdata,
   extendedSearch,
   showAdd,
@@ -11,25 +15,30 @@ export default function StockSearchResults({
   return (
     <div>
       <h2>SearchResults:</h2>
-      {searchdata?.map((r) => (
-        <div key={r.symbol}>
-          <SearchResult
-            name={r.name}
-            symbol={r.symbol}
-            exchange={r.exchange}
-            mic={r.mic}
-          />
-          {!showAdd && (
-            <button
-              onClick={() => {
-                onSelect(r.symbol);
-              }}
-            >
-              Add Holding
-            </button>
-          )}
-        </div>
-      ))}
+      {loading && <p>Loading...</p>}
+      {error && <p>Error</p>}
+      {!error &&
+        searchdata?.map((r) => (
+          <div key={r.symbol}>
+            <SearchResult
+              name={r.name}
+              symbol={r.symbol}
+              exchange={r.exchange}
+              mic={r.mic}
+            />
+            {!showAdd && (
+              <button
+                onClick={() => {
+                  onSelect(r.symbol);
+                }}
+              >
+                Add Holding
+              </button>
+            )}
+          </div>
+        ))}
+      {extendedloading && <p>Loading...</p>}
+      {extendederror && <p>Error</p>}
       {extendedSearch &&
         extendedsearchdata?.map((r) => (
           <div key={r.symbol}>
@@ -50,7 +59,7 @@ export default function StockSearchResults({
             )}
           </div>
         ))}
-      {!extendedSearch && (
+      {!error && !extendederror && !extendedSearch && (
         <button
           onClick={() => {
             onExtend();

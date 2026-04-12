@@ -68,9 +68,9 @@ def get_price(symbol: str) -> stock.Stock | None:
 
             infodata = client.search_tickers_backup(symbol)
             info_rows = (infodata or {}).get("data") or []
-
-            p = price_rows[0]
+            
             if price_rows and info_rows:
+                p = price_rows[0]
                 return stock.Stock(
                     symbol=p["symbol"],
                     price=float(p["close"]),

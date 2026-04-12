@@ -9,7 +9,7 @@ export default function CryptoSearch({ onAddHolding }) {
   const [showAdd, setShowAdd] = useState(false);
   const [amount, setAmount] = useState("");
 
-  const data = useCryptoprice(query);
+  const { data, loading, error } = useCryptoprice(query);
 
   function saveHolding() {
     if (!data?.symbol) return;
@@ -42,13 +42,16 @@ export default function CryptoSearch({ onAddHolding }) {
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={onKeyDown}
       />
-
-      <PriceCard asset={data?.name} price={data?.price} />
+      {!loading && !error && data?.name && (
+        <PriceCard asset={data.name} price={data.price} />
+      )}
+      {loading && !error && <p>Loading...</p>}
       {data?.name && !showAdd && (
         <button onClick={() => setShowAdd(true)}>Add Holding</button>
       )}
+      {error && <p>An Error has occured</p>}
 
-      {data?.name && showAdd && (
+      {data?.name && showAdd && !error && (
         <div>
           <input
             value={amount}
