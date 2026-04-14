@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     COINCAP_API_KEY: Optional[str] = None
     DEV_MODE: bool = False
     UPSTREAM_DEBUG: bool = False
+    LOGGING_LEVEL: str = "INFO"
 
     model_config = SettingsConfigDict(env_file=Path(__file__).parent / '../.env', env_file_encoding='utf-8')
 

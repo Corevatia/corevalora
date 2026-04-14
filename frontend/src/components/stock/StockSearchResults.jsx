@@ -59,7 +59,7 @@ export default function StockSearchResults({
             )}
           </div>
         ))}
-      {!error && !extendederror && !extendedSearch && (
+      {!error && !extendederror && !extendedSearch && searchdata && (
         <button
           onClick={() => {
             onExtend();

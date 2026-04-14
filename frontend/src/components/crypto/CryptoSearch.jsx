@@ -49,7 +49,7 @@ export default function CryptoSearch({ onAddHolding }) {
       {data?.name && !showAdd && (
         <button onClick={() => setShowAdd(true)}>Add Holding</button>
       )}
-      {error && <p>An Error has occured</p>}
+      {error && <p>An Error has occurred</p>}
 
       {data?.name && showAdd && !error && (
         <div>

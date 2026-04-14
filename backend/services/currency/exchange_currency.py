@@ -1,3 +1,7 @@
+import logging
+
+logger = logging.getLogger(__name__)
+
 EXCHANGE_CURRENCY = {
 
     # USA
@@ -89,7 +93,6 @@ EXCHANGE_CURRENCY = {
     # Thailand
     "XBKK": "THB",
 
-
     # Turkey
     "XIST": "TRY",
 
@@ -101,5 +104,5 @@ EXCHANGE_CURRENCY = {
 def get_exchange_currency(mic):
     currency = EXCHANGE_CURRENCY.get(mic)
     if not currency:
-        print(f"[WARN] Unknown exchange MIC: {mic}")
+        logger.error(f"Exchange not supported{mic}")
     return currency
