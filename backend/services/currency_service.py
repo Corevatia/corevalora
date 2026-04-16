@@ -43,7 +43,7 @@ def convert_base(base_currency, rates):
     try:
         base_rate = rates[base_currency]
     except KeyError:
-        raise HTTPException(status_code=404, detail=f"can't get currency rate for {base_currency}")
+        raise KeyError(f"Unknown currency: {base_currency}")
 
     new_rates = {}
     for c, rate in rates.items():

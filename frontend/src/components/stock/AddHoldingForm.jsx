@@ -21,6 +21,10 @@ export default function AddHoldingForm({
         />
         <div>
           <input
+            type="number"
+            min="0"
+            step="any"
+            required
             value={amount}
             onChange={(e) => onAmountChange(e.target.value)}
             placeholder="Amount (e.g. 0.5)"

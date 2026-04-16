@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   useStockSearch,
   useStockSearchBackup,
@@ -27,9 +27,16 @@ export default function StockSearch({ onAddHolding }) {
     loading: extendedSearchLoading,
     error: extendedSearchError,
   } = useStockSearchBackup(query, extendedSearch);
-  const existingSymbols = new Set((searchdata ?? []).map((r) => r.symbol));
-  const extendedsearchdata = (rawExtendedsearchdata ?? []).filter(
-    (r) => !existingSymbols.has(r.symbol),
+  const existingSymbols = useMemo(
+    () => new Set((searchdata ?? []).map((r) => r.symbol)),
+    [searchdata],
+  );
+  const extendedsearchdata = useMemo(
+    () =>
+      (rawExtendedsearchdata ?? []).filter(
+        (r) => !existingSymbols.has(r.symbol),
+      ),
+    [rawExtendedsearchdata, existingSymbols],
   );
   const {
     data: stockdata,

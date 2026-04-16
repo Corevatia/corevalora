@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 import models.stock as stock
 from services.currency.exchange_currency import get_exchange_currency
 from services.providers.marketstack_client import MarketStackClient
@@ -28,7 +27,7 @@ def get_stock_search(query: str):
     return results
 
 
-def get_price(symbol: str) -> stock.Stock | None:
+def get_price(symbol: str) -> stock.Stock:
     if settings.DEV_MODE:
         return stock.Stock(symbol="STXY",
                            price=123.45,
@@ -40,43 +39,35 @@ def get_price(symbol: str) -> stock.Stock | None:
 
     try:
         data = client.get_asset_eod(symbol)
-        rows = (data or {}).get("data") or []
-        if rows:
-            e = rows[0]
-            return stock.Stock(
-                symbol=e["symbol"],
-                price=float(e["close"]),
-                date=e["date"][:10],
-                exchange=e["exchange"],
-                name=e["name"],
-                currency=e["price_currency"],
-            )
+        e = data["data"][0]
+        return stock.Stock(
+            symbol=e["symbol"],
+            price=float(e["close"]),
+            date=e["date"][:10],
+            exchange=e["exchange"],
+            name=e["name"],
+            currency=e["price_currency"],
+        )
     except requests.HTTPError as e:
         status = e.response.status_code if e.response is not None else None
 
         if status != 406:
             raise
-        try:
-            pricedata = client.get_asset_price_backup(symbol)
-            price_rows = (pricedata or {}).get("data") or []
 
-            infodata = client.search_tickers_backup(symbol)
-            info_rows = (infodata or {}).get("data") or []
+        pricedata = client.get_asset_price_backup(symbol)
+        p = pricedata["data"][0]
 
-            if price_rows and info_rows:
-                p = price_rows[0]
-                return stock.Stock(
-                    symbol=p["symbol"],
-                    price=float(p["close"]),
-                    date=p["date"][:10],
-                    exchange=p["exchange"],
-                    name=info_rows[0]["name"],
-                    currency=get_exchange_currency(p["exchange"]),
-                )
-        except requests.HTTPError as e:
-            if e.response.status_code == 422:
-                raise HTTPException(status_code=404, detail=f"cant find Symbol:{symbol}")
-            raise
+        infodata = client.search_tickers_backup(symbol)
+        info = infodata["data"][0]
+
+        return stock.Stock(
+            symbol=p["symbol"],
+            price=float(p["close"]),
+            date=p["date"][:10],
+            exchange=p["exchange"],
+            name=info["name"],
+            currency=get_exchange_currency(p["exchange"]),
+        )
 
 
 def search_backup(query: str):

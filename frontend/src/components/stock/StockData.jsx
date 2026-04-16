@@ -1,3 +1,5 @@
+import { formatPrice } from "../../lib/format";
+
 export default function StockData({
   asset,
   symbol,
@@ -10,10 +12,7 @@ export default function StockData({
     <div>
       <h3>{asset}</h3>
       <p>Symbol: {symbol}</p>
-      <p>
-        Price: {currentPrice}
-        {currency}
-      </p>
+      <p>Price: {formatPrice(currentPrice, currency)}</p>
       <p>Last Update: {date}</p>
       <p>Exchange: {exchange}</p>
     </div>

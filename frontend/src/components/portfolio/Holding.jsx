@@ -1,3 +1,5 @@
+import { formatPrice } from "../../lib/format";
+
 export default function Holding({
   asset,
   symbol,
@@ -13,11 +15,7 @@ export default function Holding({
       <h3>{asset}</h3>
       <p>Symbol: {symbol}</p>
       <p>Amount: {amount}</p>
-      <p>
-        Value: {currentvalue}
-        {currency}
-      </p>
-
+      <p>Value:{formatPrice(currentvalue, currency)}</p>
       <p>Last Update: {date}</p>
       {exchange && <p>Exchange: {exchange}</p>}
       <p>Currency: {currency}</p>

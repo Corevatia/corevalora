@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useCurrencyRate } from "../../features/hooks";
+import { formatPrice } from "../../lib/format";
 export default function PortfolioStats({ holdings }) {
   const [selectedCurrency, setSelectedCurrency] = useState("EUR");
 
@@ -28,10 +29,7 @@ export default function PortfolioStats({ holdings }) {
           <option key={c}>{c}</option>
         ))}
       </select>
-      <p>
-        Portfolio Value:{value}
-        {selectedCurrency}
-      </p>
+      <p>Portfolio Value:{formatPrice(value, selectedCurrency)}</p>
     </div>
   );
 }

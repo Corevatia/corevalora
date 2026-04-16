@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 import logging
 from services.providers.coincap_client import CoinCapClient
 import models.crypto as crypto
@@ -21,18 +20,12 @@ def get_crypto_price(asset_id: str):
         )
 
     data = client.get_asset(asset_id)
-    try:
-        price = float(data["data"]["priceUsd"])
-        symbol = data["data"]["symbol"]
-        name = data["data"]["name"]
-    except KeyError:
-        logger.error(f"{asset_id} has no/invalid data")
-        raise HTTPException(status_code=400, detail="Invalid crypto price data")
+    asset = data["data"]
 
     return crypto.Crypto(
-        symbol=symbol,
-        name=name,
-        price=price,
+        symbol=asset["symbol"],
+        name=asset["name"],
+        price=float(asset["priceUsd"]),
         currency="USD",
         date=str(datetime.now().strftime("%Y-%m-%d %H:%M")),
     )
