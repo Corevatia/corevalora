@@ -2,7 +2,7 @@ import Holding from "../portfolio/Holding.jsx";
 
 export default function Portfolio({ holdings, onDelete }) {
   return (
-    <div style={{ padding: 24, fontFamily: "system-ui" }}>
+    <div style={{ padding: 12, fontFamily: "system-ui" }}>
       <h1>Portfolio</h1>
       {holdings.map((h) => (
         <div key={h.asset}>

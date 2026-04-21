@@ -1,4 +1,5 @@
 import { formatPrice } from "../../lib/format";
+import s from "./Holding.module.css";
 
 export default function Holding({
   asset,
@@ -11,7 +12,7 @@ export default function Holding({
 }) {
   const currentvalue = amount * currentPrice;
   return (
-    <div>
+    <div className={s.card}>
       <h3>{asset}</h3>
       <p>Symbol: {symbol}</p>
       <p>Amount: {amount}</p>

@@ -48,14 +48,15 @@ export function Dashboard() {
   }
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      <div style={{ padding: 16 }}>
+    <div style={{ display: "flex", height: "100vh", justifyContent: "center" }}>
+      <div
+        style={{ padding: 16, width: "400px", borderLeft: "1px solid #ddd" }}
+      >
         <div
           style={{
             display: "flex",
             alignItems: "center",
             gap: 12,
-            marginBottom: 16,
           }}
         >
           <h2 style={{ margin: 0 }}>Dashboard</h2>
@@ -79,7 +80,6 @@ export function Dashboard() {
         style={{
           width: "400px",
           overflow: "auto",
-          borderRight: "1px solid #ddd",
           borderLeft: "1px solid #ddd",
         }}
       >

@@ -17,7 +17,7 @@ export default function PortfolioStats({ holdings }) {
     value = value + (h.price * h.amount) / currencyrate.rate;
   });
   return (
-    <div>
+    <div style={{ padding: 16, fontFamily: "system-ui" }}>
       {loading && <p>Loading...</p>}
       {error && <p>ERROR</p>}
       <select
