@@ -1,4 +1,10 @@
 import logging
+from typing import Annotated
+
+from fastapi import Depends
+from sqlalchemy.orm import Session
+
+from db.database import get_db
 
 from fastapi import APIRouter, HTTPException, Path
 import services.currency_service as service
@@ -12,9 +18,11 @@ router = APIRouter(prefix="/currency", tags=["currency"])
 
 
 @router.get("/rates/{base_currency}", response_model=RateResponse)
-def get_currency_rates(base_currency: str = Path(min_length=3, max_length=3, pattern=r"^[A-Z]+$")):
+def get_currency_rates(base_currency: Annotated[str, Path(min_length=3, max_length=3, pattern=r"^[A-Z]+$")],
+                       db: Session = Depends(get_db),
+                       ):
     try:
-        return service.get_currency_rates(base_currency)
+        return service.get_currency_rates(base_currency, db)
     except requests.HTTPError as e:
         logger.error(f"Upstream error fetching rates for {base_currency}: {e}")
         raise HTTPException(status_code=503, detail="External service unavailable")
