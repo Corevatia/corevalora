@@ -1,13 +1,8 @@
-from pathlib import Path
+from core.config import settings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
-DB_PATH = Path(__file__).parent.parent / "data" / "corevalora.db"
-DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-
-engine = create_engine(f"sqlite:///{DB_PATH}",
-                       connect_args={"check_same_thread": False},  # required for SQLite
-                       )
+engine = create_engine(settings.DB_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

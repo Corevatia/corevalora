@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:17
+    container_name: corevalora-pg
+    environment:
+      POSTGRES_USER: corevalora
+      POSTGRES_PASSWORD: dev
+      POSTGRES_DB: corevalora
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:

@@ -1,4 +1,8 @@
 #!/bin/bash
+set -e
+
+docker compose up -d db
+
 gnome-terminal -- bash -lic "
 cd backend
 source .venv/bin/activate

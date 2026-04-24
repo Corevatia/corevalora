@@ -4,8 +4,6 @@ from routers.stock import router as stock_router
 from routers.currency import router as currency_router
 from fastapi.middleware.cors import CORSMiddleware
 from core.logging_config import setup_logging
-from db.database import engine, Base
-from db import models
 
 app = FastAPI(title="CoreValora")
 app.add_middleware(
@@ -18,7 +16,5 @@ app.add_middleware(
 app.include_router(crypto_router)
 app.include_router(stock_router)
 app.include_router(currency_router)
-
-Base.metadata.create_all(bind=engine)
 
 setup_logging()
