@@ -1,5 +1,6 @@
 from datetime import date
 from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from db.models import CurrencyRate
@@ -57,10 +58,13 @@ def _load_or_fetch_eur_rates(db: Session) -> dict[str, float]:
     rates = rates_data["rates"]
     rates["EUR"] = 1
 
-    db.add_all([
-        CurrencyRate(fetch_date=today, base_currency="EUR", target_currency=c, rate=r)
+    stmt = insert(CurrencyRate).values([
+        {"fetch_date": today, "base_currency": "EUR", "target_currency": c, "rate": r}
         for c, r in rates.items()
-    ])
+    ]).on_conflict_do_nothing(
+        index_elements=["fetch_date", "base_currency", "target_currency"]
+    )
+    db.execute(stmt)
     db.commit()
     return rates
 

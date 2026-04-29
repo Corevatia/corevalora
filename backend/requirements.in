@@ -6,3 +6,6 @@ pydantic
 pydantic-settings
 psycopg[binary]
 alembic
+passlib[bcrypt]
+bcrypt<4.1
+email-validator

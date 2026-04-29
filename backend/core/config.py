@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     UPSTREAM_DEBUG: bool = False
     LOGGING_LEVEL: str = "INFO"
     DB_URL: str
+    SESSION_LIFETIME_DAYS: int = 14
 
     model_config = SettingsConfigDict(env_file=Path(__file__).parent / '../.env', env_file_encoding='utf-8')
 
