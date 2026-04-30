@@ -19,3 +19,32 @@ export function fetchStockSearchBackup(query, options = {}) {
 export function fetchCurrencyRate(baseCurrency, options = {}) {
   return request(`/currency/rates/${baseCurrency}`, options);
 }
+
+export async function fetchMe(options = {}) {
+  try {
+    return await request(`/auth/me`, options);
+  } catch (err) {
+    if (err.status === 401) return null;
+    throw err;
+  }
+}
+
+export function loginUser({ email, password }, options = {}) {
+  return request(`/auth/login`, {
+    ...options,
+    method: "POST",
+    json: { email, password },
+  });
+}
+
+export function registerUser({ email, password }, options = {}) {
+  return request(`/auth/register`, {
+    ...options,
+    method: "POST",
+    json: { email, password },
+  });
+}
+
+export function logoutUser(options = {}) {
+  return request(`/auth/logout`, { ...options, method: "POST" });
+}

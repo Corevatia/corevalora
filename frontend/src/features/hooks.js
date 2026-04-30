@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   fetchCryptoPrice,
   fetchStockSearch,
   fetchStockEOD,
   fetchStockSearchBackup,
   fetchCurrencyRate,
+  fetchMe,
+  loginUser,
+  registerUser,
+  logoutUser,
 } from "./api";
 
 function useFetch(fetchFn, param, enabled = true) {
@@ -50,3 +54,73 @@ export const useStockSearchBackup = (query, enabled = false) =>
 
 export const useCurrencyRate = (baseCurrency) =>
   useFetch(fetchCurrencyRate, baseCurrency);
+
+export function useMe() {
+  const [state, setState] = useState({
+    user: null,
+    loading: true,
+    error: null,
+  });
+  const [reloadToken, setReloadToken] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetchMe({ signal: controller.signal })
+      .then((data) => {
+        setState({ user: data, loading: false, error: null });
+      })
+      .catch((err) => {
+        if (err.name === "AbortError") return;
+        console.error(err);
+        setState((prev) => ({ ...prev, loading: false, error: err }));
+      });
+
+    return () => controller.abort();
+  }, [reloadToken]);
+
+  const refetch = useCallback(() => {
+    setState((prev) => ({ ...prev, loading: true }));
+    setReloadToken((n) => n + 1);
+  }, []);
+
+  return { ...state, refetch };
+}
+
+function useMutation(mutationFn) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const mutate = useCallback(
+    async (...args) => {
+      setLoading(true);
+      setError(null);
+      try {
+        return await mutationFn(...args);
+      } catch (err) {
+        setError(err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [mutationFn]
+  );
+
+  return { mutate, loading, error };
+}
+
+export function useLogin() {
+  const { mutate, loading, error } = useMutation(loginUser);
+  return { login: mutate, loading, error };
+}
+
+export function useRegister() {
+  const { mutate, loading, error } = useMutation(registerUser);
+  return { register: mutate, loading, error };
+}
+
+export function useLogout() {
+  const { mutate, loading, error } = useMutation(logoutUser);
+  return { logout: mutate, loading, error };
+}
