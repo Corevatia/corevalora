@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { useCurrencyRate } from "../../features/hooks";
 import { formatPrice } from "../../lib/format";
+
 export default function PortfolioStats({ holdings }) {
   const [selectedCurrency, setSelectedCurrency] = useState("EUR");
 
   const { data: ratedata, loading, error } = useCurrencyRate(selectedCurrency);
 
-  const currencies = ratedata?.rates?.map((r) => r.exchange_currency) || [];
+  const rates = ratedata?.rates ?? [];
+  const currencies = rates.map((r) => r.exchange_currency);
 
-  let value = 0;
-  holdings.map((h) => {
-    const currencyrate = ratedata.rates.find(
-      (r) => r.exchange_currency === h.currency,
-    );
-    if (!currencyrate) return null;
-    value = value + (h.price * h.amount) / currencyrate.rate;
-  });
+  const value = holdings.reduce((sum, h) => {
+    const currencyrate = rates.find((r) => r.exchange_currency === h.currency);
+    if (!currencyrate) return sum;
+    return sum + (h.price * h.amount) / currencyrate.rate;
+  }, 0);
+
   return (
     <div style={{ padding: 16, fontFamily: "system-ui" }}>
       {loading && <p>Loading...</p>}
@@ -29,7 +29,7 @@ export default function PortfolioStats({ holdings }) {
           <option key={c}>{c}</option>
         ))}
       </select>
-      <p>Portfolio Value:{formatPrice(value, selectedCurrency)}</p>
+      <p>Portfolio Value: {formatPrice(value, selectedCurrency)}</p>
     </div>
   );
 }

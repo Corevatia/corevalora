@@ -5,10 +5,10 @@ import StockSearch from "../components/stock/StockSearch";
 import PortfolioStats from "../components/portfolio/PortfolioStats";
 
 export function Dashboard() {
-  const [holdings, setHolding] = useState([]);
+  const [holdings, setHoldings] = useState([]);
   const [mode, setMode] = useState("stock");
 
-  function AddHolding({
+  function addHolding({
     asset,
     symbol,
     amount,
@@ -17,34 +17,22 @@ export function Dashboard() {
     exchange,
     currency,
   }) {
-    const amt = Number(amount);
-    const prc = Number(price);
-    setHolding((prev) => {
+    setHoldings((prev) => {
       const existing = prev.find((h) => h.asset === asset);
       if (!existing) {
         return [
           ...prev,
-          {
-            asset: asset,
-            symbol: symbol,
-            amount: amt,
-            date: date,
-            price: prc,
-            exchange: exchange,
-            currency: currency,
-          },
+          { asset, symbol, amount, date, price, exchange, currency },
         ];
       }
-
-      const newamount = existing.amount + amt;
-
       return prev.map((h) =>
-        h.asset === asset ? { ...h, amount: newamount } : h,
+        h.asset === asset ? { ...h, amount: h.amount + amount } : h,
       );
     });
   }
-  function DeleteHolding({ asset }) {
-    setHolding((prev) => prev.filter((h) => h.asset !== asset));
+
+  function deleteHolding(asset) {
+    setHoldings((prev) => prev.filter((h) => h.asset !== asset));
   }
 
   return (
@@ -52,15 +40,8 @@ export function Dashboard() {
       <div
         style={{ padding: 16, width: "400px", borderLeft: "1px solid #ddd" }}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <h2 style={{ margin: 0 }}>Dashboard</h2>
-
           <select
             value={mode}
             onChange={(e) => setMode(e.target.value)}
@@ -71,9 +52,9 @@ export function Dashboard() {
           </select>
         </div>
         {mode === "crypto" ? (
-          <CryptoSearch onAddHolding={AddHolding} />
+          <CryptoSearch onAddHolding={addHolding} />
         ) : (
-          <StockSearch onAddHolding={AddHolding} />
+          <StockSearch onAddHolding={addHolding} />
         )}
       </div>
       <div
@@ -83,7 +64,7 @@ export function Dashboard() {
           borderLeft: "1px solid #ddd",
         }}
       >
-        <Portfolio holdings={holdings} onDelete={DeleteHolding} />
+        <Portfolio holdings={holdings} onDelete={deleteHolding} />
       </div>
       <div
         style={{
@@ -93,7 +74,7 @@ export function Dashboard() {
           borderLeft: "1px solid #ddd",
         }}
       >
-        <PortfolioStats holdings={holdings}></PortfolioStats>
+        <PortfolioStats holdings={holdings} />
       </div>
     </div>
   );

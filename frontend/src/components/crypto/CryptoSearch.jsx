@@ -1,12 +1,11 @@
-import { useCryptoprice } from "../../features/hooks.js";
-import { PriceCard } from "../shared/PriceCard.jsx";
-import { SearchBar } from "../shared/SearchBar.jsx";
 import { useState } from "react";
+import { useCryptoprice } from "../../features/hooks.js";
+import { SearchBar } from "../shared/SearchBar.jsx";
+import AddHoldingForm from "../shared/AddHoldingForm.jsx";
 
 export default function CryptoSearch({ onAddHolding }) {
   const [inputValue, setInputValue] = useState("");
   const [query, setQuery] = useState("");
-  const [showAdd, setShowAdd] = useState(false);
   const [amount, setAmount] = useState("");
 
   const { data, loading, error } = useCryptoprice(query);
@@ -26,13 +25,16 @@ export default function CryptoSearch({ onAddHolding }) {
     });
 
     setAmount("");
-    setShowAdd(false);
+    setInputValue("");
+    setQuery("");
   }
+
   function onKeyDown(e) {
     if (e.key === "Enter") {
       setQuery(inputValue.trim().toLowerCase());
     }
   }
+
   return (
     <div style={{ padding: 24, fontFamily: "system-ui" }}>
       <h1>CryptoSearch</h1>
@@ -42,24 +44,16 @@ export default function CryptoSearch({ onAddHolding }) {
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={onKeyDown}
       />
-      {!loading && !error && data?.name && (
-        <PriceCard asset={data.name} price={data.price} />
-      )}
-      {loading && !error && <p>Loading...</p>}
-      {data?.name && !showAdd && (
-        <button onClick={() => setShowAdd(true)}>Add Holding</button>
-      )}
-      {error && <p>An Error has occurred</p>}
 
-      {data?.name && showAdd && !error && (
-        <div>
-          <input
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Amount (e.g. 0.5)"
-          />
-          <button onClick={saveHolding}>Confirm</button>
-        </div>
+      {query && (
+        <AddHoldingForm
+          data={data}
+          loading={loading}
+          error={error}
+          amount={amount}
+          onAmountChange={setAmount}
+          onConfirm={saveHolding}
+        />
       )}
     </div>
   );

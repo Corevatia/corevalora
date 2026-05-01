@@ -1,5 +1,19 @@
 import SearchResult from "./SearchResult";
 
+function ResultRow({ result, onSelect }) {
+  return (
+    <div>
+      <SearchResult
+        name={result.name}
+        symbol={result.symbol}
+        exchange={result.exchange}
+        mic={result.mic}
+      />
+      <button onClick={() => onSelect(result.symbol)}>Add Holding</button>
+    </div>
+  );
+}
+
 export default function StockSearchResults({
   searchdata,
   loading,
@@ -8,7 +22,6 @@ export default function StockSearchResults({
   extendederror,
   extendedsearchdata,
   extendedSearch,
-  showAdd,
   onExtend,
   onSelect,
 }) {
@@ -19,54 +32,16 @@ export default function StockSearchResults({
       {error && <p>Error</p>}
       {!error &&
         searchdata?.map((r) => (
-          <div key={r.symbol}>
-            <SearchResult
-              name={r.name}
-              symbol={r.symbol}
-              exchange={r.exchange}
-              mic={r.mic}
-            />
-            {!showAdd && (
-              <button
-                onClick={() => {
-                  onSelect(r.symbol);
-                }}
-              >
-                Add Holding
-              </button>
-            )}
-          </div>
+          <ResultRow key={r.symbol} result={r} onSelect={onSelect} />
         ))}
       {extendedloading && <p>Loading...</p>}
       {extendederror && <p>Error</p>}
       {extendedSearch &&
         extendedsearchdata?.map((r) => (
-          <div key={r.symbol}>
-            <SearchResult
-              name={r.name}
-              symbol={r.symbol}
-              exchange={r.exchange}
-              mic={r.mic}
-            />
-            {!showAdd && (
-              <button
-                onClick={() => {
-                  onSelect(r.symbol);
-                }}
-              >
-                Add Holding
-              </button>
-            )}
-          </div>
+          <ResultRow key={r.symbol} result={r} onSelect={onSelect} />
         ))}
       {!error && !extendederror && !extendedSearch && searchdata && (
-        <button
-          onClick={() => {
-            onExtend();
-          }}
-        >
-          Extend Search
-        </button>
+        <button onClick={onExtend}>Extend Search</button>
       )}
     </div>
   );

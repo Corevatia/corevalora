@@ -6,15 +6,13 @@ import {
 } from "../../features/hooks";
 import { SearchBar } from "../shared/SearchBar";
 import StockSearchResults from "./StockSearchResults";
-import AddHoldingForm from "./AddHoldingForm";
+import AddHoldingForm from "../shared/AddHoldingForm";
 
 export default function StockSearch({ onAddHolding }) {
   const [inputValue, setInputValue] = useState("");
   const [query, setQuery] = useState("");
-  const [showAdd, setShowAdd] = useState(false);
+  const [selectedSymbol, setSelectedSymbol] = useState(null);
   const [amount, setAmount] = useState("");
-  const [stockSymbol, setStockSymbol] = useState("");
-  const [showSearch, setShowSearch] = useState(true);
   const [extendedSearch, setExtendedSearch] = useState(false);
 
   const {
@@ -42,7 +40,7 @@ export default function StockSearch({ onAddHolding }) {
     data: stockdata,
     loading: stockDataLoading,
     error: stockDataError,
-  } = useStockprice(stockSymbol);
+  } = useStockprice(selectedSymbol);
 
   function saveHolding() {
     if (!stockdata?.symbol) return;
@@ -59,30 +57,16 @@ export default function StockSearch({ onAddHolding }) {
     });
 
     setAmount("");
-    setShowAdd(false);
-    setShowSearch(true);
+    setSelectedSymbol(null);
   }
+
   function onKeyDown(e) {
     if (e.key === "Enter") {
       setExtendedSearch(false);
       setQuery(inputValue.trim());
     }
   }
-  function Select(symbol) {
-    setShowAdd(true);
-    setStockSymbol(symbol);
-    setShowSearch(false);
-  }
-  function Extend() {
-    setExtendedSearch(true);
-  }
-  function Confirm() {
-    saveHolding();
-  }
-  function AmountChange(value) {
-    setAmount(value);
-    setExtendedSearch(false);
-  }
+
   return (
     <div style={{ padding: 24, fontFamily: "system-ui" }}>
       <h1>StockSearch</h1>
@@ -93,28 +77,28 @@ export default function StockSearch({ onAddHolding }) {
         onKeyDown={onKeyDown}
       />
 
-      {showSearch &&
-        StockSearchResults({
-          searchdata: searchdata,
-          loading: searchloading,
-          error: searchError,
-          extendedloading: extendedSearchLoading,
-          extendederror: extendedSearchError,
-          extendedsearchdata: extendedsearchdata,
-          extendedSearch: extendedSearch,
-          showAdd: showAdd,
-          onExtend: Extend,
-          onSelect: Select,
-        })}
-      {!showSearch &&
-        AddHoldingForm({
-          stockdata: stockdata,
-          loading: stockDataLoading,
-          error: stockDataError,
-          onConfirm: Confirm,
-          amount: amount,
-          onAmountChange: AmountChange,
-        })}
+      {selectedSymbol ? (
+        <AddHoldingForm
+          data={stockdata}
+          loading={stockDataLoading}
+          error={stockDataError}
+          amount={amount}
+          onAmountChange={setAmount}
+          onConfirm={saveHolding}
+        />
+      ) : (
+        <StockSearchResults
+          searchdata={searchdata}
+          loading={searchloading}
+          error={searchError}
+          extendedloading={extendedSearchLoading}
+          extendederror={extendedSearchError}
+          extendedsearchdata={extendedsearchdata}
+          extendedSearch={extendedSearch}
+          onExtend={() => setExtendedSearch(true)}
+          onSelect={setSelectedSymbol}
+        />
+      )}
     </div>
   );
 }
