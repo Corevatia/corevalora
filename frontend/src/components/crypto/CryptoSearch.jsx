@@ -6,25 +6,22 @@ import AddHoldingForm from "../shared/AddHoldingForm.jsx";
 export default function CryptoSearch({ onAddHolding }) {
   const [inputValue, setInputValue] = useState("");
   const [query, setQuery] = useState("");
-  const [amount, setAmount] = useState("");
 
   const { data, loading, error } = useCryptoprice(query);
 
-  function saveHolding() {
+  function saveHolding({ amount, buyPrice }) {
     if (!data?.symbol) return;
-    const amt = Number(amount);
-    if (!Number.isFinite(amt) || amt <= 0) return;
 
     onAddHolding({
       asset: data.name,
       symbol: data.symbol,
-      amount: amt,
+      amount,
+      buyPrice,
       price: Number(data.price),
       date: data.date,
       currency: data.currency,
     });
 
-    setAmount("");
     setInputValue("");
     setQuery("");
   }
@@ -50,8 +47,6 @@ export default function CryptoSearch({ onAddHolding }) {
           data={data}
           loading={loading}
           error={error}
-          amount={amount}
-          onAmountChange={setAmount}
           onConfirm={saveHolding}
         />
       )}

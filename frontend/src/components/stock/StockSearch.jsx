@@ -12,7 +12,6 @@ export default function StockSearch({ onAddHolding }) {
   const [inputValue, setInputValue] = useState("");
   const [query, setQuery] = useState("");
   const [selectedSymbol, setSelectedSymbol] = useState(null);
-  const [amount, setAmount] = useState("");
   const [extendedSearch, setExtendedSearch] = useState(false);
 
   const {
@@ -42,21 +41,19 @@ export default function StockSearch({ onAddHolding }) {
     error: stockDataError,
   } = useStockprice(selectedSymbol);
 
-  function saveHolding() {
+  function saveHolding({ amount, buyPrice }) {
     if (!stockdata?.symbol) return;
-    const amt = Number(amount);
-    if (!Number.isFinite(amt) || amt <= 0) return;
     onAddHolding({
       asset: stockdata.name,
       symbol: stockdata.symbol,
-      amount: amt,
+      amount,
+      buyPrice,
       date: stockdata.date,
       price: Number(stockdata.price),
       exchange: stockdata.exchange,
       currency: stockdata.currency,
     });
 
-    setAmount("");
     setSelectedSymbol(null);
   }
 
@@ -82,8 +79,6 @@ export default function StockSearch({ onAddHolding }) {
           data={stockdata}
           loading={stockDataLoading}
           error={stockDataError}
-          amount={amount}
-          onAmountChange={setAmount}
           onConfirm={saveHolding}
         />
       ) : (

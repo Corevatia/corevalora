@@ -11,6 +11,7 @@ export default function Portfolio({ holdings, onDelete }) {
             symbol={h.symbol}
             amount={h.amount}
             date={h.date}
+            avgPrice={h.avgPrice}
             currentPrice={h.price}
             exchange={h.exchange}
             currency={h.currency}

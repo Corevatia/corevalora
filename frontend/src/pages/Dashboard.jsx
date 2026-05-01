@@ -14,6 +14,7 @@ export function Dashboard() {
     amount,
     date,
     price,
+    buyPrice,
     exchange,
     currency,
   }) {
@@ -22,12 +23,31 @@ export function Dashboard() {
       if (!existing) {
         return [
           ...prev,
-          { asset, symbol, amount, date, price, exchange, currency },
+          {
+            asset,
+            symbol,
+            amount,
+            date,
+            price,
+            avgPrice: buyPrice,
+            exchange,
+            currency,
+          },
         ];
       }
-      return prev.map((h) =>
-        h.asset === asset ? { ...h, amount: h.amount + amount } : h,
-      );
+      return prev.map((h) => {
+        if (h.asset !== asset) return h;
+        const newAmount = h.amount + amount;
+        const newAvgPrice =
+          (h.amount * h.avgPrice + amount * buyPrice) / newAmount;
+        return {
+          ...h,
+          amount: newAmount,
+          avgPrice: newAvgPrice,
+          price,
+          date,
+        };
+      });
     });
   }
 
