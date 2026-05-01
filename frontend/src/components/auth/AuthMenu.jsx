@@ -1,10 +1,5 @@
-import { useState } from "react";
-import {
-  useMe,
-  useLogin,
-  useRegister,
-  useLogout,
-} from "../../features/hooks";
+import { useState, useEffect } from "react";
+import { useMe, useLogin, useRegister, useLogout } from "../../features/hooks";
 import s from "./AuthMenu.module.css";
 
 export default function AuthMenu() {
@@ -43,10 +38,32 @@ export default function AuthMenu() {
   );
 }
 
+function getAuthErrorMessage(error) {
+  if (!error) return null;
+  switch (error.status) {
+    case 401:
+      return "Email or password wrong";
+    case 409:
+      return "This email is already registered";
+    case undefined:
+      return "Connection to server failed";
+    default:
+      return "Something went wrong. please try again";
+  }
+}
+
 function AuthModal({ onClose, onSuccess }) {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    function onKeyDown(e) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onClose]);
 
   const { login, loading: loginLoading, error: loginError } = useLogin();
   const {
@@ -56,8 +73,7 @@ function AuthModal({ onClose, onSuccess }) {
   } = useRegister();
 
   const loading = loginLoading || registerLoading;
-  const error =
-    mode === "login" ? loginError : registerError ?? loginError;
+  const error = mode === "login" ? loginError : (registerError ?? loginError);
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -68,7 +84,7 @@ function AuthModal({ onClose, onSuccess }) {
       await login({ email, password });
       onSuccess();
     } catch {
-      // error-State
+      //
     }
   }
 
@@ -101,16 +117,12 @@ function AuthModal({ onClose, onSuccess }) {
 
           {error && (
             <div style={{ color: "crimson", fontSize: 13 }}>
-              {error.message}
+              {getAuthErrorMessage(error)}
             </div>
           )}
 
           <button type="submit" className={s.btnPrimary} disabled={loading}>
-            {loading
-              ? "..."
-              : mode === "login"
-                ? "Login"
-                : "Register"}
+            {loading ? "..." : mode === "login" ? "Login" : "Register"}
           </button>
         </form>
 
