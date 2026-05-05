@@ -41,4 +41,12 @@ class Holding(Base):
     __tablename__ = 'holdings'
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete='CASCADE'))
-    
+    asset: Mapped[str] = mapped_column(String(255))
+    symbol: Mapped[str] = mapped_column(String(10))
+    amount: Mapped[float] = mapped_column(Float)
+    avg_price: Mapped[float] = mapped_column(Float)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "symbol"),
+    )

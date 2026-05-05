@@ -19,7 +19,7 @@ export function Dashboard() {
     currency,
   }) {
     setHoldings((prev) => {
-      const existing = prev.find((h) => h.asset === asset);
+      const existing = prev.find((h) => h.symbol === symbol);
       if (!existing) {
         return [
           ...prev,
@@ -36,7 +36,7 @@ export function Dashboard() {
         ];
       }
       return prev.map((h) => {
-        if (h.asset !== asset) return h;
+        if (h.symbol !== symbol) return h;
         const newAmount = h.amount + amount;
         const newAvgPrice =
           (h.amount * h.avgPrice + amount * buyPrice) / newAmount;
