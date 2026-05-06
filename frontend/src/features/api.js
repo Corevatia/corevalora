@@ -1,9 +1,11 @@
 import { request } from "../lib/http";
 
+//crypto
 export function fetchCryptoPrice(name, options = {}) {
   return request(`/crypto/price/${name}`, options);
 }
 
+//stock
 export function fetchStockEOD(symbol, options = {}) {
   return request(`/stock/eod_price/${symbol}`, options);
 }
@@ -16,10 +18,12 @@ export function fetchStockSearchBackup(query, options = {}) {
   return request(`/stock/search/backup/${query}`, options);
 }
 
+//currency
 export function fetchCurrencyRate(baseCurrency, options = {}) {
   return request(`/currency/rates/${baseCurrency}`, options);
 }
 
+//auth
 export async function fetchMe(options = {}) {
   try {
     return await request(`/auth/me`, options);
@@ -47,4 +51,27 @@ export function registerUser({ email, password }, options = {}) {
 
 export function logoutUser(options = {}) {
   return request(`/auth/logout`, { ...options, method: "POST" });
+}
+
+//portfolio
+export function fetchHoldings(options = {}) {
+  return request(`/portfolio/Holdings`, options);
+}
+
+export function saveHolding(
+  { asset, symbol, amount, buy_price },
+  options = {},
+) {
+  return request(`/portfolio/Holdings`, {
+    ...options,
+    method: "POST",
+    json: { asset, symbol, amount, buy_price },
+  });
+}
+
+export function deleteHolding(symbol, options = {}) {
+  return request(`/portfolio/Holdings/${symbol}`, {
+    ...options,
+    method: "DELETE",
+  });
 }

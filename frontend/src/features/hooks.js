@@ -9,6 +9,9 @@ import {
   loginUser,
   registerUser,
   logoutUser,
+  fetchHoldings,
+  saveHolding,
+  deleteHolding,
 } from "./api";
 
 function useFetch(fetchFn, param, enabled = true) {
@@ -43,21 +46,9 @@ function useFetch(fetchFn, param, enabled = true) {
   return { data: state.data, loading, error: state.error };
 }
 
-export const useCryptoprice = (name) => useFetch(fetchCryptoPrice, name);
-
-export const useStockprice = (symbol) => useFetch(fetchStockEOD, symbol);
-
-export const useStockSearch = (query) => useFetch(fetchStockSearch, query);
-
-export const useStockSearchBackup = (query, enabled = false) =>
-  useFetch(fetchStockSearchBackup, query, enabled);
-
-export const useCurrencyRate = (baseCurrency) =>
-  useFetch(fetchCurrencyRate, baseCurrency);
-
-export function useMe() {
+function useQuery(fetchFn) {
   const [state, setState] = useState({
-    user: null,
+    data: null,
     loading: true,
     error: null,
   });
@@ -66,9 +57,9 @@ export function useMe() {
   useEffect(() => {
     const controller = new AbortController();
 
-    fetchMe({ signal: controller.signal })
+    fetchFn({ signal: controller.signal })
       .then((data) => {
-        setState({ user: data, loading: false, error: null });
+        setState({ data, loading: false, error: null });
       })
       .catch((err) => {
         if (err.name === "AbortError") return;
@@ -77,13 +68,12 @@ export function useMe() {
       });
 
     return () => controller.abort();
-  }, [reloadToken]);
+  }, [reloadToken, fetchFn]);
 
   const refetch = useCallback(() => {
     setState((prev) => ({ ...prev, loading: true }));
     setReloadToken((n) => n + 1);
   }, []);
-
   return { ...state, refetch };
 }
 
@@ -104,10 +94,27 @@ function useMutation(mutationFn) {
         setLoading(false);
       }
     },
-    [mutationFn]
+    [mutationFn],
   );
 
   return { mutate, loading, error };
+}
+
+export const useCryptoprice = (name) => useFetch(fetchCryptoPrice, name);
+
+export const useStockprice = (symbol) => useFetch(fetchStockEOD, symbol);
+
+export const useStockSearch = (query) => useFetch(fetchStockSearch, query);
+
+export const useStockSearchBackup = (query, enabled = false) =>
+  useFetch(fetchStockSearchBackup, query, enabled);
+
+export const useCurrencyRate = (baseCurrency) =>
+  useFetch(fetchCurrencyRate, baseCurrency);
+
+export function useMe() {
+  const { data, loading, error, refetch } = useQuery(fetchMe);
+  return { user: data, loading, error, refetch };
 }
 
 export function useLogin() {
@@ -123,4 +130,19 @@ export function useRegister() {
 export function useLogout() {
   const { mutate, loading, error } = useMutation(logoutUser);
   return { logout: mutate, loading, error };
+}
+
+export function useHoldings() {
+  const { data, loading, error, refetch } = useQuery(fetchHoldings);
+  return { holdings: data, loading, error, refetch };
+}
+
+export function useSaveHolding() {
+  const { mutate, loading, error } = useMutation(saveHolding);
+  return { save: mutate, loading, error };
+}
+
+export function useDeleteHolding() {
+  const { mutate, loading, error } = useMutation(deleteHolding);
+  return { remove: mutate, loading, error };
 }

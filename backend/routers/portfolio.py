@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 
 
-@router.get("/Holdings", response_model=List[HoldingOut])
+@router.get("/holdings", response_model=List[HoldingOut])
 def list_holdings(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     holdings = db.execute(
         select(Holding).where(Holding.user_id == current_user.id)
@@ -24,7 +24,7 @@ def list_holdings(current_user: User = Depends(get_current_user), db: Session = 
     return holdings
 
 
-@router.post("/Holdings", response_model=HoldingOut, status_code=status.HTTP_201_CREATED)
+@router.post("/holdings", response_model=HoldingOut, status_code=status.HTTP_201_CREATED)
 def add_holding(
         data: HoldingIn,
         current_user: User = Depends(get_current_user),
@@ -56,7 +56,7 @@ def add_holding(
     return holding
 
 
-@router.delete("/Holdings/{symbol}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/holdings/{symbol}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_holding(
         symbol: str,
         current_user: User = Depends(get_current_user),
