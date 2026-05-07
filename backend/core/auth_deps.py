@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, Cookie, HTTPException
+from fastapi import Depends, Cookie, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from starlette import status

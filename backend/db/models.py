@@ -46,7 +46,24 @@ class Holding(Base):
     amount: Mapped[float] = mapped_column(Float)
     avg_price: Mapped[float] = mapped_column(Float)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    kind: Mapped[str] = mapped_column(String(10))
 
     __table_args__ = (
-        UniqueConstraint("user_id", "symbol"),
+        UniqueConstraint("user_id", "symbol", "kind"),
     )
+
+
+class AssetPriceCache(Base):
+    __tablename__ = 'asset_price_cache'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    kind: Mapped[str] = mapped_column(String(10))
+    key: Mapped[str] = mapped_column(String(50))
+    symbol: Mapped[str] = mapped_column(String(10))
+    asset_name: Mapped[str] = mapped_column(String(255))
+    price: Mapped[float] = mapped_column(Float)
+    currency: Mapped[str] = mapped_column(String(3))
+    exchange: Mapped[str | None] = mapped_column(String(10), nullable=True)
+    price_date: Mapped[datetime | None] = mapped_column(Date, nullable=True)
+    cached_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    __table_args__ = (UniqueConstraint("kind", "key"),)

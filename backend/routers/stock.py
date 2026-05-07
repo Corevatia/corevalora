@@ -1,6 +1,9 @@
 import logging
 
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, HTTPException, Path, Depends
+from sqlalchemy.orm import Session
+
+from db.database import get_db
 from models.stock import Stock, SearchResult
 import services.stock_service as service
 from typing import List
@@ -12,9 +15,11 @@ router = APIRouter(prefix="/stock", tags=["stock"])
 
 
 @router.get("/eod_price/{symbol}", response_model=Stock)
-def stock_price(symbol: str = Path(min_length=1, max_length=20, pattern=r"^[a-zA-Z0-9.]+$")):
+def stock_price(symbol: str = Path(min_length=1, max_length=20, pattern=r"^[a-zA-Z0-9.]+$"),
+                db: Session = Depends(get_db),
+                ):
     try:
-        return service.get_price(symbol)
+        return service.get_price(symbol, db)
     except requests.HTTPError as e:
         status = e.response.status_code if e.response is not None else None
         if status == 422:

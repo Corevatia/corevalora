@@ -1,9 +1,12 @@
 import logging
 
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, HTTPException, Path, Depends
+from sqlalchemy.orm import Session
+
 import services.crypto_service as service
 import requests
 
+from db.database import get_db
 from models.crypto import Crypto
 
 logger = logging.getLogger(__name__)
@@ -12,9 +15,11 @@ router = APIRouter(prefix="/crypto", tags=["crypto"])
 
 
 @router.get("/price/{asset_id}", response_model=Crypto)
-def get_price(asset_id: str = Path(min_length=1, max_length=50, pattern=r"^[a-z0-9\-]+$")):
+def get_price(asset_id: str = Path(min_length=1, max_length=50, pattern=r"^[a-z0-9\-]+$"),
+              db: Session = Depends(get_db),
+              ):
     try:
-        return service.get_crypto_price(asset_id)
+        return service.get_crypto_price(asset_id, db)
     except requests.HTTPError as e:
         if e.response.status_code == 404:
             logger.error(f"Crypto asset not found: {asset_id}")

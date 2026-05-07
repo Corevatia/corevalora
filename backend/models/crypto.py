@@ -7,3 +7,4 @@ class Crypto(BaseModel):
     price: float
     currency: str
     date: str
+    stale: bool = False

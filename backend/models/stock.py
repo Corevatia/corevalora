@@ -15,3 +15,4 @@ class Stock(BaseModel):
     exchange: str
     name: str
     currency: str
+    stale: bool = False
