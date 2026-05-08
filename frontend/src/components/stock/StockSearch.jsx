@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import {
+  useSaveHolding,
   useStockSearch,
   useStockSearchBackup,
   useStockprice,
@@ -8,7 +9,7 @@ import { SearchBar } from "../shared/SearchBar";
 import StockSearchResults from "./StockSearchResults";
 import AddHoldingForm from "../shared/AddHoldingForm";
 
-export default function StockSearch({ onAddHolding }) {
+export default function StockSearch({ onSaved }) {
   const [inputValue, setInputValue] = useState("");
   const [query, setQuery] = useState("");
   const [selectedSymbol, setSelectedSymbol] = useState(null);
@@ -41,20 +42,24 @@ export default function StockSearch({ onAddHolding }) {
     error: stockDataError,
   } = useStockprice(selectedSymbol);
 
-  function saveHolding({ amount, buyPrice }) {
-    if (!stockdata?.symbol) return;
-    onAddHolding({
-      asset: stockdata.name,
-      symbol: stockdata.symbol,
-      amount,
-      buyPrice,
-      date: stockdata.date,
-      price: Number(stockdata.price),
-      exchange: stockdata.exchange,
-      currency: stockdata.currency,
-    });
+  const { save, error: saveError } = useSaveHolding();
 
-    setSelectedSymbol(null);
+  async function handleConfirm({ amount, buyPrice }) {
+    if (!stockdata?.symbol) return;
+
+    try {
+      await save({
+        asset: stockdata.name,
+        symbol: stockdata.symbol,
+        kind: "stock",
+        amount,
+        buy_price: buyPrice,
+      });
+      setSelectedSymbol(null);
+      onSaved?.();
+    } catch {
+      //
+    }
   }
 
   function onKeyDown(e) {
@@ -79,7 +84,7 @@ export default function StockSearch({ onAddHolding }) {
           data={stockdata}
           loading={stockDataLoading}
           error={stockDataError}
-          onConfirm={saveHolding}
+          onConfirm={handleConfirm}
         />
       ) : (
         <StockSearchResults
@@ -94,6 +99,8 @@ export default function StockSearch({ onAddHolding }) {
           onSelect={setSelectedSymbol}
         />
       )}
+
+      {saveError && <p>Could not save holding: {saveError.message}</p>}
     </div>
   );
 }

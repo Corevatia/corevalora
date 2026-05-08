@@ -55,22 +55,22 @@ export function logoutUser(options = {}) {
 
 //portfolio
 export function fetchHoldings(options = {}) {
-  return request(`/portfolio/Holdings`, options);
+  return request(`/portfolio/holdings`, options);
 }
 
 export function saveHolding(
-  { asset, symbol, amount, buy_price },
+  { asset, symbol, kind, amount, buy_price },
   options = {},
 ) {
-  return request(`/portfolio/Holdings`, {
+  return request(`/portfolio/holdings`, {
     ...options,
     method: "POST",
-    json: { asset, symbol, amount, buy_price },
+    json: { asset, symbol, kind, amount, buy_price },
   });
 }
 
 export function deleteHolding(symbol, options = {}) {
-  return request(`/portfolio/Holdings/${symbol}`, {
+  return request(`/portfolio/holdings/${symbol}`, {
     ...options,
     method: "DELETE",
   });

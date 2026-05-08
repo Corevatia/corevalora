@@ -16,8 +16,8 @@ export default function PortfolioStats({ holdings }) {
         (r) => r.exchange_currency === h.currency,
       );
       if (!currencyrate) return acc;
-      acc.invested += (h.avgPrice * h.amount) / currencyrate.rate;
-      acc.value += (h.price * h.amount) / currencyrate.rate;
+      acc.invested += (h.avg_price * h.amount) / currencyrate.rate;
+      acc.value += ((h.price ?? 0) * h.amount) / currencyrate.rate;
       return acc;
     },
     {

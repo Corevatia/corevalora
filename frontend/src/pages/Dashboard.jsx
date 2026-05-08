@@ -3,57 +3,24 @@ import Portfolio from "../components/portfolio/Portfolio";
 import CryptoSearch from "../components/crypto/CryptoSearch";
 import StockSearch from "../components/stock/StockSearch";
 import PortfolioStats from "../components/portfolio/PortfolioStats";
+import { useHoldings, useDeleteHolding } from "../features/hooks";
 
 export function Dashboard() {
-  const [holdings, setHoldings] = useState([]);
   const [mode, setMode] = useState("stock");
 
-  function addHolding({
-    asset,
-    symbol,
-    amount,
-    date,
-    price,
-    buyPrice,
-    exchange,
-    currency,
-  }) {
-    setHoldings((prev) => {
-      const existing = prev.find((h) => h.symbol === symbol);
-      if (!existing) {
-        return [
-          ...prev,
-          {
-            asset,
-            symbol,
-            amount,
-            date,
-            price,
-            avgPrice: buyPrice,
-            exchange,
-            currency,
-          },
-        ];
-      }
-      return prev.map((h) => {
-        if (h.symbol !== symbol) return h;
-        const newAmount = h.amount + amount;
-        const newAvgPrice =
-          (h.amount * h.avgPrice + amount * buyPrice) / newAmount;
-        return {
-          ...h,
-          amount: newAmount,
-          avgPrice: newAvgPrice,
-          price,
-          date,
-        };
-      });
-    });
+  const { holdings, loading, error, refetch } = useHoldings();
+  const { remove } = useDeleteHolding();
+
+  async function handleDelete(symbol) {
+    try {
+      await remove(symbol);
+      refetch();
+    } catch {
+      //
+    }
   }
 
-  function deleteHolding(asset) {
-    setHoldings((prev) => prev.filter((h) => h.asset !== asset));
-  }
+  const items = holdings ?? [];
 
   return (
     <div style={{ display: "flex", height: "100vh", justifyContent: "center" }}>
@@ -72,9 +39,9 @@ export function Dashboard() {
           </select>
         </div>
         {mode === "crypto" ? (
-          <CryptoSearch onAddHolding={addHolding} />
+          <CryptoSearch onSaved={refetch} />
         ) : (
-          <StockSearch onAddHolding={addHolding} />
+          <StockSearch onSaved={refetch} />
         )}
       </div>
       <div
@@ -84,7 +51,9 @@ export function Dashboard() {
           borderLeft: "1px solid #ddd",
         }}
       >
-        <Portfolio holdings={holdings} onDelete={deleteHolding} />
+        {loading && <p>Loading...</p>}
+        {error && <p>Could not load holdings</p>}
+        <Portfolio holdings={items} onDelete={handleDelete} />
       </div>
       <div
         style={{
@@ -94,7 +63,7 @@ export function Dashboard() {
           borderLeft: "1px solid #ddd",
         }}
       >
-        <PortfolioStats holdings={holdings} />
+        <PortfolioStats holdings={items} />
       </div>
     </div>
   );

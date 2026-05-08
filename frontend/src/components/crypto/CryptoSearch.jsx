@@ -1,29 +1,31 @@
 import { useState } from "react";
-import { useCryptoprice } from "../../features/hooks.js";
+import { useCryptoprice, useSaveHolding } from "../../features/hooks.js";
 import { SearchBar } from "../shared/SearchBar.jsx";
 import AddHoldingForm from "../shared/AddHoldingForm.jsx";
 
-export default function CryptoSearch({ onAddHolding }) {
+export default function CryptoSearch({ onSaved }) {
   const [inputValue, setInputValue] = useState("");
   const [query, setQuery] = useState("");
 
   const { data, loading, error } = useCryptoprice(query);
+  const { save, error: saveError } = useSaveHolding();
 
-  function saveHolding({ amount, buyPrice }) {
+  async function handleConfirm({ amount, buyPrice }) {
     if (!data?.symbol) return;
-
-    onAddHolding({
-      asset: data.name,
-      symbol: data.symbol,
-      amount,
-      buyPrice,
-      price: Number(data.price),
-      date: data.date,
-      currency: data.currency,
-    });
-
-    setInputValue("");
-    setQuery("");
+    try {
+      await save({
+        asset: data.name,
+        symbol: data.symbol,
+        kind: "crypto",
+        amount,
+        buy_price: buyPrice,
+      });
+      setInputValue("");
+      setQuery("");
+      onSaved?.();
+    } catch {
+      //
+    }
   }
 
   function onKeyDown(e) {
@@ -47,9 +49,11 @@ export default function CryptoSearch({ onAddHolding }) {
           data={data}
           loading={loading}
           error={error}
-          onConfirm={saveHolding}
+          onConfirm={handleConfirm}
         />
       )}
+
+      {saveError && <p>Could not save holding: {saveError.message}</p>}
     </div>
   );
 }
