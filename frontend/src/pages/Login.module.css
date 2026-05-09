@@ -1,33 +1,14 @@
-.topRight {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  z-index: 10;
-}
-
-.badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--card-bg);
-  padding: 6px 10px;
-  border: 1px solid var(--card-border);
-  border-radius: 6px;
-}
-
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--overlay-bg);
+.page {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  min-height: 100vh;
+  padding: 16px;
 }
 
-.modal {
+.card {
   background: var(--card-bg);
-  padding: 24px;
+  padding: 32px;
   border-radius: 8px;
   min-width: 320px;
   display: flex;
@@ -49,15 +30,6 @@
   font-size: 14px;
   background: var(--input-bg);
   color: inherit;
-}
-
-.btn {
-  padding: 6px 12px;
-  border: 1px solid var(--btn-border);
-  border-radius: 4px;
-  background: var(--btn-bg);
-  color: inherit;
-  cursor: pointer;
 }
 
 .btnPrimary {
