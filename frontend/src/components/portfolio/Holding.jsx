@@ -1,4 +1,4 @@
-import { formatPrice } from "../../lib/format";
+import { formatDateTime, formatPrice } from "../../lib/format";
 import s from "./Holding.module.css";
 
 export default function Holding({
@@ -25,7 +25,7 @@ export default function Holding({
       <p style={{ color: gainColor }}>
         Gain/Loss: {formatPrice(gain, currency)}
       </p>
-      <p>Last Update: {date}</p>
+      <p>Last Update: {formatDateTime(date)}</p>
       {exchange && <p>Exchange: {exchange}</p>}
     </div>
   );

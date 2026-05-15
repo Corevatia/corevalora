@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from services.price_cache import read_price, is_fresh, upsert_price
 from services.providers.coincap_client import CoinCapClient
 import models.crypto as crypto
-from datetime import datetime
+from datetime import datetime, timezone
 from core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -50,7 +50,7 @@ def get_crypto_price(asset_id: str, db: Session) -> crypto.Crypto:
             name=asset["name"],
             price=float(asset["priceUsd"]),
             currency="USD",
-            date=datetime.utcnow().strftime("%Y-%m-%d %H:%M"),
+            date=datetime.now(timezone.utc).isoformat(),
             stale=False,
         )
     except requests.HTTPError as e:
@@ -75,6 +75,6 @@ def _cache_to_crypto(cached, stale: bool) -> crypto.Crypto:
         name=cached.asset_name,
         price=cached.price,
         currency=cached.currency,
-        date=cached.cached_at.strftime("%Y-%m-%d %H:%M"),
+        date=cached.cached_at.isoformat(),
         stale=stale,
     )

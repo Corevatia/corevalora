@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { formatPrice } from "../../lib/format";
+import { formatDateTime, formatPrice } from "../../lib/format";
 
 export default function AddHoldingForm({ data, loading, error, onConfirm }) {
   if (loading) return <p>Loading...</p>;
@@ -27,7 +27,7 @@ function AddHoldingFormReady({ data, onConfirm }) {
       <h3>{data.name}</h3>
       <p>Symbol: {data.symbol}</p>
       <p>Market price: {formatPrice(data.price, data.currency)}</p>
-      <p>Last Update: {data.date}</p>
+      <p>Last Update: {formatDateTime(data.date)}</p>
       {data.exchange && <p>Exchange: {data.exchange}</p>}
       <div>
         <label>

@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
@@ -19,7 +19,7 @@ def read_price(db, kind, key) -> AssetPriceCache | None:
 
 
 def is_fresh(cached, kind) -> bool:
-    age = (datetime.utcnow() - cached.cached_at).total_seconds()
+    age = (datetime.now(timezone.utc) - cached.cached_at).total_seconds()
     return age < CACHE_TTL_SECONDS[kind]
 
 
@@ -44,7 +44,7 @@ def upsert_price(
         currency=currency,
         exchange=exchange,
         price_date=price_date,
-        cached_at=datetime.utcnow(),
+        cached_at=datetime.now(timezone.utc),
     )
     stmt = stmt.on_conflict_do_update(
         index_elements=["kind", "key"],
