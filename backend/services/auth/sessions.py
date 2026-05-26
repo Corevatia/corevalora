@@ -1,6 +1,7 @@
 import secrets
 from db.models import UserSession
 from sqlalchemy.orm import Session
+from sqlalchemy import delete
 from datetime import datetime, timedelta, timezone
 from core.config import settings
 
@@ -27,7 +28,7 @@ def get_session(db: Session, session_id: str) -> UserSession | None:
         return None
 
     if session.expires_at < datetime.now(timezone.utc):
-        db.delete(session_id)
+        db.delete(session)
         db.commit()
         return None
 
@@ -39,3 +40,12 @@ def delete_session(db, session_id) -> None:
     if session is not None:
         db.delete(session)
         db.commit()
+
+def delete_expired_sessions(db: Session) -> int:
+    result = db.execute(
+        delete(UserSession).where(UserSession.expires_at < datetime.now(timezone.utc))
+        )
+
+    db.commit()
+    return result.rowcount
+
