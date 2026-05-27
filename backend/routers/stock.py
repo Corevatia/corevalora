@@ -1,9 +1,12 @@
 import logging
 
-from fastapi import APIRouter, HTTPException, Path, Depends
+from fastapi import APIRouter, HTTPException, Path, Depends, Request
 from sqlalchemy.orm import Session
 
+from core.auth_deps import get_current_user
+from core.rate_limit import limiter
 from db.database import get_db
+from db.models import User
 from models.stock import Stock, SearchResult
 import services.stock_service as service
 from typing import List
@@ -15,8 +18,10 @@ router = APIRouter(prefix="/stock", tags=["stock"])
 
 
 @router.get("/eod_price/{symbol}", response_model=Stock)
-def stock_price(symbol: str = Path(min_length=1, max_length=20, pattern=r"^[a-zA-Z0-9.]+$"),
+@limiter.limit("60/minute")
+def stock_price(request: Request,symbol: str = Path(min_length=1, max_length=20, pattern=r"^[a-zA-Z0-9.]+$"),
                 db: Session = Depends(get_db),
+                current_user: User = Depends(get_current_user),
                 ):
     try:
         return service.get_price(symbol, db)
@@ -36,7 +41,9 @@ def stock_price(symbol: str = Path(min_length=1, max_length=20, pattern=r"^[a-zA
 
 
 @router.get("/search/{query}", response_model=List[SearchResult])
-def stock_search(query: str = Path(min_length=1, max_length=50, pattern=r"^[a-zA-Z0-9.\- ]+$")):
+@limiter.limit("15/minute")
+def stock_search(request: Request,query: str = Path(min_length=1, max_length=50, pattern=r"^[a-zA-Z0-9.\- ]+$"),
+                 current_user: User = Depends(get_current_user)):
     try:
         return service.get_stock_search(query)
     except requests.HTTPError as e:
@@ -51,7 +58,9 @@ def stock_search(query: str = Path(min_length=1, max_length=50, pattern=r"^[a-zA
 
 
 @router.get("/search/backup/{query}", response_model=List[SearchResult])
-def stock_search_backup(query: str = Path(min_length=1, max_length=50, pattern=r"^[a-zA-Z0-9.\- ]+$")):
+@limiter.limit("15/minute")
+def stock_search_backup(request: Request,query: str = Path(min_length=1, max_length=50, pattern=r"^[a-zA-Z0-9.\- ]+$"),
+                        current_user: User = Depends(get_current_user)):
     try:
         return service.search_backup(query)
     except requests.HTTPError as e:

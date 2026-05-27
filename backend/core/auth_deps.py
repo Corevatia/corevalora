@@ -1,4 +1,4 @@
-from fastapi import Depends, Cookie, HTTPException
+from fastapi import Depends, Cookie, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from starlette import status
@@ -10,7 +10,7 @@ from services.auth.sessions import get_session
 SESSION_COOKIE_NAME = "session_id"
 
 
-def get_current_user(session_id: str | None = Cookie(default=None, alias=SESSION_COOKIE_NAME),
+def get_current_user(request: Request,session_id: str | None = Cookie(default=None, alias=SESSION_COOKIE_NAME),
                      db: Session = Depends(get_db)) -> User:
     if session_id is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
@@ -25,4 +25,6 @@ def get_current_user(session_id: str | None = Cookie(default=None, alias=SESSION
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
+    # Stash for slowapi's key_func so the rate limit keys on the user, not the session
+    request.state.user = user
     return user

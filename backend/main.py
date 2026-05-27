@@ -8,7 +8,10 @@ from routers.currency import router as currency_router
 from routers.auth import router as auth_router
 from routers.portfolio import router as portfolio_router
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from core.logging_config import setup_logging
+from core.rate_limit import limiter
 from db.database import SessionLocal
 from services.auth.sessions import delete_expired_sessions
 
@@ -42,6 +45,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="CoreValora", lifespan=lifespan)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],

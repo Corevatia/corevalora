@@ -1,7 +1,9 @@
-from fastapi import Depends, HTTPException, APIRouter, status, Response, Cookie
+from fastapi import Depends, HTTPException, APIRouter, status, Response, Cookie, Request
+from slowapi.util import get_remote_address
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from core.auth_deps import SESSION_COOKIE_NAME, get_current_user
+from core.rate_limit import limiter
 from core.config import settings
 from db.database import get_db
 from db.models import User
@@ -15,7 +17,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED, )
-def register(data: RegisterIn, db: Session = Depends(get_db)):
+@limiter.limit("5/minute", key_func=get_remote_address)
+def register(request: Request,data: RegisterIn, db: Session = Depends(get_db)):
     existing = db.execute(
         select(User).where(User.email == data.email)
     ).scalar_one_or_none()
@@ -33,7 +36,8 @@ def register(data: RegisterIn, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=UserOut)
-def login(data: LoginIn, response: Response, db: Session = Depends(get_db)):
+@limiter.limit("5/minute", key_func=get_remote_address)
+def login(request: Request,data: LoginIn, response: Response, db: Session = Depends(get_db)):
     user = db.execute(
         select(User).where(User.email == data.email)
     ).scalar_one_or_none()

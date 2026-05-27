@@ -9,6 +9,8 @@ function getAuthErrorMessage(error) {
       return "Email or password wrong";
     case 409:
       return "This email is already registered";
+    case 429:
+      return "Too many attempts, please, wait a moment";
     case undefined:
       return "Connection to server failed";
     default:
