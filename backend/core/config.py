@@ -11,6 +11,10 @@ class Settings(BaseSettings):
     LOGGING_LEVEL: str = "INFO"
     DB_URL: str
     SESSION_LIFETIME_DAYS: int = 14
+    CRYPTO_CACHE_TTL_SECONDS: Optional[int] = 120
+    STOCK_CACHE_TTL_HOURS: Optional[int] = 24
+    SEARCH_CACHE_TTL_HOURS: Optional[int] = 48
+    MAINTENANCE_LOOP_HOURS: Optional[int] = 6
 
     model_config = SettingsConfigDict(env_file=Path(__file__).parent / '../.env', env_file_encoding='utf-8')
 

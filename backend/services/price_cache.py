@@ -1,12 +1,13 @@
 from datetime import datetime, date, timezone
 
+from core.config import settings
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from db.models import AssetPriceCache
 
-CACHE_TTL_SECONDS = {"crypto": 120, "stock": 86400}
+CACHE_TTL_SECONDS = {"crypto": settings.CRYPTO_CACHE_TTL_SECONDS, "stock": 1440 * settings.STOCK_CACHE_TTL_HOURS}
 
 
 def read_price(db, kind, key) -> AssetPriceCache | None:

@@ -14,28 +14,38 @@ from core.logging_config import setup_logging
 from core.rate_limit import limiter
 from db.database import SessionLocal
 from services.auth.sessions import delete_expired_sessions
+from services.search_cache import delete_expired_search
+from core.config import settings
 
 setup_logging()
 logger = logging.getLogger(__name__)
 
-SESSION_CLEANUP_INTERVAL_SECONDS = 60 * 60 * 6
+MAINTENANCE_CLEANUP_INTERVAL_SECONDS = 3600 * settings.MAINTENANCE_LOOP_HOURS
 
+CLEANUP_TASKS = (
+("expired sessions", delete_expired_sessions),
+("expired searches", delete_expired_search),
+)
 
-async def _session_cleanup_loop():
+def _run_cleanup(label, cleanup):
+    try:
+        with SessionLocal() as db:
+            deleted = cleanup(db)
+            if deleted:
+                logger.info("Deleted %d %s", deleted, label)
+    except Exception:
+        logger.exception("Cleanup failed: %s", label)
+
+async def _maintenance_loop():
     while True:
-        try:
-            with SessionLocal() as db:
-                deleted = delete_expired_sessions(db)
-                if deleted:
-                    logger.info("Deleted %d expired sessions", deleted)
-        except Exception:
-            logger.exception("Session cleanup failed")
-        await asyncio.sleep(SESSION_CLEANUP_INTERVAL_SECONDS)
+        for label, cleanup in CLEANUP_TASKS:
+            _run_cleanup(label, cleanup)
+        await asyncio.sleep(MAINTENANCE_CLEANUP_INTERVAL_SECONDS)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    task = asyncio.create_task(_session_cleanup_loop())
+    task = asyncio.create_task(_maintenance_loop())
     yield
     task.cancel()
     try:

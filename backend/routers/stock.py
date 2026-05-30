@@ -43,9 +43,10 @@ def stock_price(request: Request,symbol: str = Path(min_length=1, max_length=20,
 @router.get("/search/{query}", response_model=List[SearchResult])
 @limiter.limit("15/minute")
 def stock_search(request: Request,query: str = Path(min_length=1, max_length=50, pattern=r"^[a-zA-Z0-9.\- ]+$"),
+                 db: Session = Depends(get_db),
                  current_user: User = Depends(get_current_user)):
     try:
-        return service.get_stock_search(query)
+        return service.get_stock_search(query, db)
     except requests.HTTPError as e:
         logger.error(f"Upstream error during stock search for {query}: {e}")
         raise HTTPException(status_code=503, detail="External service unavailable")
@@ -60,9 +61,10 @@ def stock_search(request: Request,query: str = Path(min_length=1, max_length=50,
 @router.get("/search/backup/{query}", response_model=List[SearchResult])
 @limiter.limit("15/minute")
 def stock_search_backup(request: Request,query: str = Path(min_length=1, max_length=50, pattern=r"^[a-zA-Z0-9.\- ]+$"),
+                        db: Session = Depends(get_db),
                         current_user: User = Depends(get_current_user)):
     try:
-        return service.search_backup(query)
+        return service.search_backup(query, db)
     except requests.HTTPError as e:
         logger.error(f"Upstream error during backup search for {query}: {e}")
         raise HTTPException(status_code=503, detail="External service unavailable")

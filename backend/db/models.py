@@ -1,5 +1,6 @@
 from datetime import datetime, date
 from sqlalchemy import Date, DateTime, Float, String, UniqueConstraint, func, ForeignKey
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from db.database import Base
 
@@ -67,3 +68,17 @@ class AssetPriceCache(Base):
     cached_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     __table_args__ = (UniqueConstraint("kind", "key"),)
+
+class SearchCache(Base):
+    __tablename__ = 'search_cache'
+    id: Mapped[int] = mapped_column(primary_key=True)
+    kind: Mapped[str] = mapped_column(String(10))
+    query: Mapped[str] = mapped_column(String(50))
+    results: Mapped[list] = mapped_column(JSONB)
+    cached_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("kind", "query"),
+    )
+
+

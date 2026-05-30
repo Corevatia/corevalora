@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 import models.stock as stock
 from services.currency.exchange_currency import get_exchange_currency
 from services.price_cache import read_price, is_fresh, upsert_price
+from services.search_cache import read_search, is_search_fresh, upsert_search
 from services.providers.marketstack_client import MarketStackClient
 import requests
 from core.config import settings
@@ -15,9 +16,13 @@ logger = logging.getLogger(__name__)
 client = MarketStackClient(api_key=settings.MARKETSTACK_API_KEY)
 
 
-def get_stock_search(query: str):
+def get_stock_search(query: str, db: Session):
     if settings.DEV_MODE:
         return [stock.SearchResult(name="StockXY", symbol="STXY", exchange="EXCHANGE", mic="EXCH")]
+
+    cached = read_search(db, kind="stock", query=query)
+    if cached and is_search_fresh(cached):
+        return [stock.SearchResult(**r) for r in cached.results]
 
     data = client.search_tickers(query)
     filtered_data = filter_marketstack_search(data) or []
@@ -30,6 +35,8 @@ def get_stock_search(query: str):
         )
         for e in filtered_data
     ]
+    upsert_search(db, kind="stock", query=query, results=[r.model_dump() for r in results])
+
     return results
 
 
@@ -132,9 +139,13 @@ def _cache_to_stock(cached, stale: bool) -> stock.Stock:
     )
 
 
-def search_backup(query: str):
+def search_backup(query: str, db: Session):
     if settings.DEV_MODE:
         return [stock.SearchResult(name="StockXY", symbol="STXY", exchange="EXCHANGE", mic="EXCH")]
+
+    cached = read_search(db, kind="bstock", query=query)
+    if cached and is_search_fresh(cached):
+        return [stock.SearchResult(**r) for r in cached.results]
 
     data = client.search_tickers_backup(query)
     filtered_data = filter_marketstack_search(data) or []
@@ -147,4 +158,6 @@ def search_backup(query: str):
         )
         for e in filtered_data
     ]
+    upsert_search(db, kind="bstock", query=query, results=[r.model_dump() for r in results])
+
     return results
