@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from db.database import get_db
 
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, HTTPException, Path, status
 import services.currency_service as service
 import requests
 
@@ -25,13 +25,13 @@ def get_currency_rates(base_currency: Annotated[str, Path(min_length=3, max_leng
         return service.get_currency_rates(base_currency, db)
     except requests.HTTPError as e:
         logger.error(f"Upstream error fetching rates for {base_currency}: {e}")
-        raise HTTPException(status_code=503, detail="External service unavailable")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")
     except requests.Timeout:
         logger.error(f"Timeout fetching rates for {base_currency}")
-        raise HTTPException(status_code=504, detail="External service timeout")
+        raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="External service timeout")
     except requests.ConnectionError as e:
         logger.error(f"Connection error fetching rates for {base_currency}: {e}")
-        raise HTTPException(status_code=503, detail="External service unavailable")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")
     except KeyError:
         logger.error(f"Currency not found: {base_currency}")
-        raise HTTPException(status_code=404, detail="Currency not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Currency not found")

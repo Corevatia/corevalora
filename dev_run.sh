@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 
+docker context use desktop-linux
 docker compose up -d db
 
 gnome-terminal -- bash -lic "

@@ -10,6 +10,7 @@ export default function Holding({
   currentPrice,
   exchange,
   currency,
+  stale,
 }) {
   const invested = amount * avgPrice;
   const currentvalue = amount * currentPrice;
@@ -17,6 +18,7 @@ export default function Holding({
   const gainColor = gain >= 0 ? "green" : "red";
   return (
     <div className={s.card}>
+      {stale && <p style={{ color: "red" }}>Couldn't get the current price</p>}
       <h3>{asset}</h3>
       <p>Symbol: {symbol}</p>
       <p>Amount: {amount}</p>

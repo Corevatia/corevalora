@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from db.models import AssetPriceCache
 
-CACHE_TTL_SECONDS = {"crypto": settings.CRYPTO_CACHE_TTL_SECONDS, "stock": 1440 * settings.STOCK_CACHE_TTL_HOURS}
+CACHE_TTL_SECONDS = {"crypto": settings.CRYPTO_CACHE_TTL_SECONDS, "stock": 3600 * settings.STOCK_CACHE_TTL_HOURS}
 
 
 def read_price(db, kind, key) -> AssetPriceCache | None:

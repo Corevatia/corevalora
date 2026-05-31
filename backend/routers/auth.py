@@ -23,7 +23,7 @@ def register(request: Request,data: RegisterIn, db: Session = Depends(get_db)):
         select(User).where(User.email == data.email)
     ).scalar_one_or_none()
     if existing is not None:
-        raise HTTPException(status_code=409, detail="Email already registered", )
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered", )
 
     user = User(
         email=data.email,

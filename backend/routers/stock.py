@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, HTTPException, Path, Depends, Request
+from fastapi import APIRouter, HTTPException, Path, Depends, Request, status
 from sqlalchemy.orm import Session
 
 from core.auth_deps import get_current_user
@@ -26,18 +26,18 @@ def stock_price(request: Request,symbol: str = Path(min_length=1, max_length=20,
     try:
         return service.get_price(symbol, db)
     except requests.HTTPError as e:
-        status = e.response.status_code if e.response is not None else None
-        if status == 422:
+        statuscode = e.response.status_code if e.response is not None else None
+        if statuscode == status.HTTP_422_UNPROCESSABLE_CONTENT:
             logger.error(f"Stock not found: {symbol}")
-            raise HTTPException(status_code=404, detail="Stock not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Stock not found")
         logger.error(f"Upstream error fetching stock price for {symbol}: {e}")
-        raise HTTPException(status_code=503, detail="External service unavailable")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")
     except requests.Timeout:
         logger.error(f"Timeout fetching stock price for {symbol}")
-        raise HTTPException(status_code=504, detail="External service timeout")
+        raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="External service timeout")
     except requests.ConnectionError as e:
         logger.error(f"Connection error fetching stock price for {symbol}: {e}")
-        raise HTTPException(status_code=503, detail="External service unavailable")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")
 
 
 @router.get("/search/{query}", response_model=List[SearchResult])
@@ -49,13 +49,13 @@ def stock_search(request: Request,query: str = Path(min_length=1, max_length=50,
         return service.get_stock_search(query, db)
     except requests.HTTPError as e:
         logger.error(f"Upstream error during stock search for {query}: {e}")
-        raise HTTPException(status_code=503, detail="External service unavailable")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")
     except requests.Timeout:
         logger.error(f"Timeout during stock search for {query}")
-        raise HTTPException(status_code=504, detail="External service timeout")
+        raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="External service timeout")
     except requests.ConnectionError as e:
         logger.error(f"Connection error during stock search for {query}: {e}")
-        raise HTTPException(status_code=503, detail="External service unavailable")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")
 
 
 @router.get("/search/backup/{query}", response_model=List[SearchResult])
@@ -67,10 +67,10 @@ def stock_search_backup(request: Request,query: str = Path(min_length=1, max_len
         return service.search_backup(query, db)
     except requests.HTTPError as e:
         logger.error(f"Upstream error during backup search for {query}: {e}")
-        raise HTTPException(status_code=503, detail="External service unavailable")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")
     except requests.Timeout:
         logger.error(f"Timeout during backup search for {query}")
-        raise HTTPException(status_code=504, detail="External service timeout")
+        raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="External service timeout")
     except requests.ConnectionError as e:
         logger.error(f"Connection error during backup search for {query}: {e}")
-        raise HTTPException(status_code=503, detail="External service unavailable")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")

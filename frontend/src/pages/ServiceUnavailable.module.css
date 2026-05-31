@@ -1,0 +1,35 @@
+.page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.card {
+  background: var(--card-bg);
+  padding: 32px;
+  border-radius: 8px;
+  min-width: 320px;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid var(--card-border);
+  text-align: center;
+}
+
+.text {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.btnPrimary {
+  padding: 6px 12px;
+  border: 1px solid #1976d2;
+  border-radius: 4px;
+  background: #1976d2;
+  color: white;
+  cursor: pointer;
+}

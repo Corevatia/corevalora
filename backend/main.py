@@ -1,7 +1,9 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from starlette.responses import JSONResponse
+
 from routers.crypto import router as crypto_router
 from routers.stock import router as stock_router
 from routers.currency import router as currency_router
@@ -10,6 +12,7 @@ from routers.portfolio import router as portfolio_router
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from sqlalchemy.exc import OperationalError, InterfaceError
 from core.logging_config import setup_logging
 from core.rate_limit import limiter
 from db.database import SessionLocal
@@ -57,6 +60,14 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="CoreValora", lifespan=lifespan)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+async def _database_unavailable_handler(request: Request, exc: Exception):
+    logger.error("Database unavailable on %s %s", request.method, exc)
+    return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, content={"detail": "Database unavailable"})
+
+
+app.add_exception_handler(OperationalError, _database_unavailable_handler)
+app.add_exception_handler(InterfaceError, _database_unavailable_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],

@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, HTTPException, Path, Depends, Request
+from fastapi import APIRouter, HTTPException, Path, Depends, Request, status
 from sqlalchemy.orm import Session
 
 import services.crypto_service as service
@@ -26,14 +26,14 @@ def get_price(request: Request,asset_id: str = Path(min_length=1, max_length=50,
     try:
         return service.get_crypto_price(asset_id, db)
     except requests.HTTPError as e:
-        if e.response.status_code == 404:
+        if e.response.status_code == status.HTTP_404_NOT_FOUND:
             logger.error(f"Crypto asset not found: {asset_id}")
-            raise HTTPException(status_code=404, detail="Crypto asset not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Crypto asset not found")
         logger.error(f"Upstream error fetching crypto price for {asset_id}: {e}")
-        raise HTTPException(status_code=503, detail="External service unavailable")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")
     except requests.Timeout:
         logger.error(f"Timeout fetching crypto price for {asset_id}")
-        raise HTTPException(status_code=504, detail="External service timeout")
+        raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="External service timeout")
     except requests.ConnectionError as e:
         logger.error(f"Connection error fetching crypto price for {asset_id}: {e}")
-        raise HTTPException(status_code=503, detail="External service unavailable")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")

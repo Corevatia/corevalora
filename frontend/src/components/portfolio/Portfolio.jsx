@@ -15,6 +15,7 @@ export default function Portfolio({ holdings, onDelete }) {
             currentPrice={h.price}
             exchange={h.exchange}
             currency={h.currency}
+            stale={h.stale}
           />
           <button onClick={() => onDelete(h.symbol)}>delete</button>
         </div>
