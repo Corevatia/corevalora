@@ -52,7 +52,7 @@ def login(request: Request,data: LoginIn, response: Response, db: Session = Depe
         value=session.id,
         max_age=SESSION_COOKIE_MAX_AGE,
         httponly=True,
-        secure=False,  # In Prod: True
+        secure=settings.COOKIE_SECURE,
         samesite="lax",
         path="/",
     )
@@ -73,5 +73,5 @@ def logout(response: Response, session_id: str | None = Cookie(default=None, ali
     response.delete_cookie(key=SESSION_COOKIE_NAME,
                            path="/",
                            samesite="lax",
-                           secure=False,  # same as Login-Cookie
+                           secure=settings.COOKIE_SECURE,
                            )

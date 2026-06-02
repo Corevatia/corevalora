@@ -15,7 +15,7 @@ client = FrankfurterClient()
 
 def get_currency_rates(base_currency, db: Session):
     base_c = base_currency.upper()
-    if settings.DEV_MODE:
+    if settings.MOCK_DATA:
         dev_rates = [
             currency.CurrencyRate(
                 exchange_currency=c,

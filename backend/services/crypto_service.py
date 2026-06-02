@@ -15,7 +15,7 @@ client = CoinCapClient(api_key=settings.COINCAP_API_KEY)
 
 
 def get_crypto_price(asset_id: str, db: Session) -> crypto.Crypto:
-    if settings.DEV_MODE:
+    if settings.MOCK_DATA:
         return crypto.Crypto(
             symbol="XYC",
             name="XYCoin",

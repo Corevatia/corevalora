@@ -17,7 +17,7 @@ client = MarketStackClient(api_key=settings.MARKETSTACK_API_KEY)
 
 
 def get_stock_search(query: str, db: Session):
-    if settings.DEV_MODE:
+    if settings.MOCK_DATA:
         return [stock.SearchResult(name="StockXY", symbol="STXY", exchange="EXCHANGE", mic="EXCH")]
 
     cached = read_search(db, kind="stock", query=query)
@@ -41,7 +41,7 @@ def get_stock_search(query: str, db: Session):
 
 
 def get_price(symbol: str, db: Session) -> stock.Stock:
-    if settings.DEV_MODE:
+    if settings.MOCK_DATA:
         return stock.Stock(symbol="STXY",
                            price=123.45,
                            date="2026-02-23",
@@ -140,7 +140,7 @@ def _cache_to_stock(cached, stale: bool) -> stock.Stock:
 
 
 def search_backup(query: str, db: Session):
-    if settings.DEV_MODE:
+    if settings.MOCK_DATA:
         return [stock.SearchResult(name="StockXY", symbol="STXY", exchange="EXCHANGE", mic="EXCH")]
 
     cached = read_search(db, kind="bstock", query=query)
