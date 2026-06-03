@@ -8,7 +8,7 @@ from core.config import settings
 from db.database import get_db
 from db.models import User
 from models.auth import RegisterIn, UserOut, LoginIn
-from services.auth.passwords import hash_password, verify_password
+from services.auth.passwords import hash_password, verify_password, verify_dummy
 from services.auth.sessions import create_session, delete_session
 
 SESSION_COOKIE_MAX_AGE = settings.SESSION_LIFETIME_DAYS * 24 * 60 * 60
@@ -42,7 +42,11 @@ def login(request: Request,data: LoginIn, response: Response, db: Session = Depe
         select(User).where(User.email == data.email)
     ).scalar_one_or_none()
 
-    if user is None or not verify_password(data.password, user.hashed_password):
+    if user is None:
+        verify_dummy()
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
+    if not verify_password(data.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     session = create_session(db, user.id)

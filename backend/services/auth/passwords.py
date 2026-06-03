@@ -9,3 +9,7 @@ def hash_password(plain: str) -> str:
 
 def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
+
+
+def verify_dummy() -> None:
+    pwd_context.dummy_verify()

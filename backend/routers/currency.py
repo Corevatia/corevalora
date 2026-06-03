@@ -1,12 +1,14 @@
 import logging
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, Request, APIRouter, HTTPException, Path, status
 from sqlalchemy.orm import Session
 
+from core.auth_deps import get_current_user
+from core.rate_limit import limiter
 from db.database import get_db
+from db.models import User
 
-from fastapi import APIRouter, HTTPException, Path, status
 import services.currency_service as service
 import requests
 
@@ -16,10 +18,11 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/currency", tags=["currency"])
 
-
 @router.get("/rates/{base_currency}", response_model=RateResponse)
-def get_currency_rates(base_currency: Annotated[str, Path(min_length=3, max_length=3, pattern=r"^[A-Z]+$")],
+@limiter.limit("120/minute")
+def get_currency_rates(request: Request, base_currency: Annotated[str, Path(min_length=3, max_length=3, pattern=r"^[A-Z]+$")],
                        db: Session = Depends(get_db),
+                       current_user: User = Depends(get_current_user),
                        ):
     try:
         return service.get_currency_rates(base_currency, db)
