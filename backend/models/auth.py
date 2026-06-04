@@ -1,15 +1,21 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, EmailStr, Field, ConfigDict, field_validator
 
 
-class RegisterIn(BaseModel):
+class _EmailIn(BaseModel):
     email: EmailStr
-    password: str = Field(min_length=8, max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, v: str) -> str:
+        return v.strip().lower()
+
+class RegisterIn(_EmailIn):
+    password: str = Field(min_length=8, max_length=72)
 
 
-class LoginIn(BaseModel):
-    email: EmailStr
+class LoginIn(_EmailIn):
     password: str
 
 

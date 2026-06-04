@@ -51,16 +51,16 @@ def add_holding(data: HoldingIn, user: User, db: Session) -> HoldingOut:
     return _enrich_holding(holding, db)
 
 
-def delete_holding(symbol: str, user: User, db: Session) -> None:
+def delete_holding(holding_id: int, user: User, db: Session) -> None:
     holding = db.execute(
         select(Holding).where(
+            Holding.id == holding_id,
             Holding.user_id == user.id,
-            Holding.symbol == symbol,
         )
     ).scalar_one_or_none()
 
     if holding is None:
-        logger.error(f"Holding not found while deleting Symbol:{symbol}")
+        logger.error(f"Holding not found while deleting id:{holding_id}")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Holding not found")
 
     db.delete(holding)

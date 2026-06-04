@@ -11,9 +11,9 @@ export function Dashboard() {
   const { holdings, loading, error, refetch } = useHoldings();
   const { remove } = useDeleteHolding();
 
-  async function handleDelete(symbol) {
+  async function handleDelete(id) {
     try {
-      await remove(symbol);
+      await remove(id);
       refetch();
     } catch {
       //

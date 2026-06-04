@@ -31,12 +31,12 @@ def add_holding(
     return portfolio_service.add_holding(data, current_user, db)
 
 
-@router.delete("/holdings/{symbol}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/holdings/{holding_id}", status_code=status.HTTP_204_NO_CONTENT)
 @limiter.limit("20/minute")
 def delete_holding(
         request: Request,
-        symbol: str,
+        holding_id: int,
         current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db),
 ):
-    portfolio_service.delete_holding(symbol, current_user, db)
+    portfolio_service.delete_holding(holding_id, current_user, db)

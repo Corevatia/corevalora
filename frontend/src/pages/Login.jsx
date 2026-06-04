@@ -70,6 +70,7 @@ export default function Login({ onSuccess }) {
             onChange={(e) => setPassword(e.target.value)}
             required
             minLength={8}
+            maxLength={72}
             className={s.input}
           />
 

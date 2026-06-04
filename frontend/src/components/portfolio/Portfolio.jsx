@@ -17,7 +17,7 @@ export default function Portfolio({ holdings, onDelete }) {
             currency={h.currency}
             stale={h.stale}
           />
-          <button onClick={() => onDelete(h.symbol)}>delete</button>
+          <button onClick={() => onDelete(h.id)}>delete</button>
         </div>
       ))}
     </div>

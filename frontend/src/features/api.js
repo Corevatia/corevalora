@@ -69,8 +69,8 @@ export function saveHolding(
   });
 }
 
-export function deleteHolding(symbol, options = {}) {
-  return request(`/portfolio/holdings/${symbol}`, {
+export function deleteHolding(id, options = {}) {
+  return request(`/portfolio/holdings/${id}`, {
     ...options,
     method: "DELETE",
   });
