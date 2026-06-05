@@ -5,7 +5,7 @@ from pathlib import Path
 
 class Settings(BaseSettings):
     MARKETSTACK_API_KEY: str
-    COINCAP_API_KEY: Optional[str] = None
+    COINCAP_API_KEY: str
     MOCK_DATA: bool = False
     UPSTREAM_DEBUG: bool = False
     LOGGING_LEVEL: str = "INFO"
