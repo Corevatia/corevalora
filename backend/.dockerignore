@@ -12,3 +12,5 @@ __pycache__/
 .mypy_chace/
 .pytest_chace/
 .ruff_cache/
+
+requirements.in

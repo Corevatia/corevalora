@@ -1,3 +1,9 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "5m"
+    max-file: "3"
+
 services:
   db:
     image: postgres:17
@@ -6,6 +12,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-corevalora}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB:-corevalora}
+    logging: *default-logging
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
@@ -29,12 +36,16 @@ services:
       DB_URL: postgresql+psycopg://${POSTGRES_USER:-corevalora}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-corevalora}
       # Must match the origin the browser loads the frontend from (see frontend port).
       CORS_ORIGINS: http://localhost:5173
+    logging: *default-logging
     ports:
       - "127.0.0.1:8000:8000"
+    volumes:
+      - ./logs:/app/logs
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
+
 
   frontend:
     build:
@@ -44,6 +55,7 @@ services:
         # via this published host port.
         VITE_API_URL: http://localhost:8000
     container_name: corevalora-frontend
+    logging: *default-logging
     ports:
       - "127.0.0.1:5173:80"
     depends_on:
