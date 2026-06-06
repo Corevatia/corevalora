@@ -10,6 +10,44 @@ services:
       - "127.0.0.1:5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-corevalora} -d ${POSTGRES_DB:-corevalora}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    container_name: corevalora-backend
+    # API keys and other config come from backend/.env ...
+    env_file:
+      - ./backend/.env
+    # ... but these are overridden here so they're correct inside the compose network.
+    environment:
+      # Inside the network the database host is "db", not localhost.
+      DB_URL: postgresql+psycopg://${POSTGRES_USER:-corevalora}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-corevalora}
+      # Must match the origin the browser loads the frontend from (see frontend port).
+      CORS_ORIGINS: http://localhost:5173
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked into the bundle at build time; the browser calls the backend
+        # via this published host port.
+        VITE_API_URL: http://localhost:8000
+    container_name: corevalora-frontend
+    ports:
+      - "127.0.0.1:5173:80"
+    depends_on:
+      - backend
     restart: unless-stopped
 
 volumes:

@@ -1,0 +1,14 @@
+# Local Python virtualenv and chaches - rebuilt inside the image
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Local secrets - provided at runtime via docker-compose, not baked in
+.env
+
+# Editor / OS noise
+.idea/
+.mypy_chace/
+.pytest_chace/
+.ruff_cache/
