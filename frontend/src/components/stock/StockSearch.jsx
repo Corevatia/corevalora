@@ -12,7 +12,7 @@ import AddHoldingForm from "../shared/AddHoldingForm";
 export default function StockSearch({ onSaved }) {
   const [inputValue, setInputValue] = useState("");
   const [query, setQuery] = useState("");
-  const [selectedSymbol, setSelectedSymbol] = useState(null);
+  const [selectedKey, setSelectedKey] = useState(null);
   const [extendedSearch, setExtendedSearch] = useState(false);
 
   const {
@@ -40,7 +40,7 @@ export default function StockSearch({ onSaved }) {
     data: stockdata,
     loading: stockDataLoading,
     error: stockDataError,
-  } = useStockprice(selectedSymbol);
+  } = useStockprice(selectedKey);
 
   const { save, error: saveError } = useSaveHolding();
 
@@ -50,12 +50,13 @@ export default function StockSearch({ onSaved }) {
     try {
       await save({
         asset: stockdata.name,
+        key: stockdata.key,
         symbol: stockdata.symbol,
         kind: "stock",
         amount,
         buy_price: buyPrice,
       });
-      setSelectedSymbol(null);
+      setSelectedKey(null);
       onSaved?.();
     } catch {
       //
@@ -65,7 +66,7 @@ export default function StockSearch({ onSaved }) {
   function onKeyDown(e) {
     if (e.key === "Enter") {
       setExtendedSearch(false);
-      setQuery(inputValue.trim());
+      setQuery(inputValue.trim().toLowerCase());
     }
   }
 
@@ -79,7 +80,7 @@ export default function StockSearch({ onSaved }) {
         onKeyDown={onKeyDown}
       />
 
-      {selectedSymbol ? (
+      {selectedKey ? (
         <AddHoldingForm
           data={stockdata}
           loading={stockDataLoading}
@@ -96,7 +97,7 @@ export default function StockSearch({ onSaved }) {
           extendedsearchdata={extendedsearchdata}
           extendedSearch={extendedSearch}
           onExtend={() => setExtendedSearch(true)}
-          onSelect={setSelectedSymbol}
+          onSelect={setSelectedKey}
         />
       )}
 

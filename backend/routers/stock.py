@@ -9,7 +9,6 @@ from db.database import get_db
 from db.models import User
 from models.stock import Stock, SearchResult
 import services.stock_service as service
-from typing import List
 import requests
 
 logger = logging.getLogger(__name__)
@@ -40,7 +39,7 @@ def stock_price(request: Request,symbol: str = Path(min_length=1, max_length=20,
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")
 
 
-@router.get("/search/{query}", response_model=List[SearchResult])
+@router.get("/search/{query}", response_model=list[SearchResult])
 @limiter.limit("15/minute")
 def stock_search(request: Request,query: str = Path(min_length=1, max_length=50, pattern=r"^[a-zA-Z0-9.\- ]+$"),
                  db: Session = Depends(get_db),
@@ -58,7 +57,7 @@ def stock_search(request: Request,query: str = Path(min_length=1, max_length=50,
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")
 
 
-@router.get("/search/backup/{query}", response_model=List[SearchResult])
+@router.get("/search/backup/{query}", response_model=list[SearchResult])
 @limiter.limit("15/minute")
 def stock_search_backup(request: Request,query: str = Path(min_length=1, max_length=50, pattern=r"^[a-zA-Z0-9.\- ]+$"),
                         db: Session = Depends(get_db),

@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field, ConfigDict
 
 class HoldingIn(BaseModel):
     asset: str
+    key: str
     symbol: str
     amount: float = Field(gt=0)
     buy_price: float = Field(ge=0)
@@ -12,6 +13,7 @@ class HoldingIn(BaseModel):
 class HoldingOut(BaseModel):
     id: int
     asset: str
+    key: str
     symbol: str
     kind: str
     amount: float

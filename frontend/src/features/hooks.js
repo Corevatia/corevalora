@@ -12,6 +12,7 @@ import {
   fetchHoldings,
   saveHolding,
   deleteHolding,
+  fetchCryptoSearch,
 } from "./api";
 
 function useFetch(fetchFn, param, enabled = true) {
@@ -101,6 +102,8 @@ function useMutation(mutationFn) {
 }
 
 export const useCryptoprice = (name) => useFetch(fetchCryptoPrice, name);
+
+export const useCryptoSearch = (query) => useFetch(fetchCryptoSearch, query);
 
 export const useStockprice = (symbol) => useFetch(fetchStockEOD, symbol);
 

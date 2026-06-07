@@ -1,4 +1,4 @@
-import SearchResult from "./SearchResult";
+import SearchResult from "../shared/SearchResult";
 
 function ResultRow({ result, onSelect }) {
   return (
@@ -9,7 +9,7 @@ function ResultRow({ result, onSelect }) {
         exchange={result.exchange}
         mic={result.mic}
       />
-      <button onClick={() => onSelect(result.symbol)}>Add Holding</button>
+      <button onClick={() => onSelect(result.key)}>Add Holding</button>
     </div>
   );
 }
@@ -32,13 +32,13 @@ export default function StockSearchResults({
       {error && <p>Error</p>}
       {!error &&
         searchdata?.map((r) => (
-          <ResultRow key={r.symbol} result={r} onSelect={onSelect} />
+          <ResultRow key={r.key} result={r} onSelect={onSelect} />
         ))}
       {extendedloading && <p>Loading...</p>}
       {extendederror && <p>Error</p>}
       {extendedSearch &&
         extendedsearchdata?.map((r) => (
-          <ResultRow key={r.symbol} result={r} onSelect={onSelect} />
+          <ResultRow key={r.key} result={r} onSelect={onSelect} />
         ))}
       {!error && !extendederror && !extendedSearch && searchdata && (
         <button onClick={onExtend}>Extend Search</button>

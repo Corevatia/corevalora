@@ -17,7 +17,7 @@ from core.logging_config import setup_logging
 from core.rate_limit import limiter
 from db.database import SessionLocal
 from services.auth.sessions import delete_expired_sessions
-from services.search_cache import delete_expired_search
+from services.cache.search_cache import delete_expired_search
 from core.config import settings
 
 setup_logging()

@@ -10,7 +10,7 @@ from core.auth_deps import get_current_user
 from core.rate_limit import limiter
 from db.database import get_db
 from db.models import User
-from models.crypto import Crypto
+from models.crypto import Crypto, SearchResult
 
 logger = logging.getLogger(__name__)
 
@@ -36,4 +36,22 @@ def get_price(request: Request,asset_id: str = Path(min_length=1, max_length=50,
         raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="External service timeout")
     except requests.ConnectionError as e:
         logger.error(f"Connection error fetching crypto price for {asset_id}: {e}")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")
+
+@router.get("/search/{query}", response_model=list[SearchResult])
+@limiter.limit("15/minute")
+def get_search_results(request: Request,query: str = Path(min_length=1, max_length=50, pattern=r"^[a-zA-Z0-9.\- ]+$"),
+                        db: Session = Depends(get_db),
+                        current_user: User = Depends(get_current_user),
+                       ):
+    try:
+        return service.get_crypto_search(query, db)
+    except requests.HTTPError as e:
+        logger.error(f"Upstream error during crypto search for {query}: {e}")
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")
+    except requests.Timeout:
+        logger.error(f"Timeout during crypto search for {query}")
+        raise HTTPException(status_code=status.HTTP_504_GATEWAY_TIMEOUT, detail="External service timeout")
+    except requests.ConnectionError as e:
+        logger.error(f"Connection error during crypto search for {query}: {e}")
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="External service unavailable")

@@ -23,13 +23,14 @@ def add_holding(data: HoldingIn, user: User, db: Session) -> HoldingOut:
     existing = db.execute(
         select(Holding).where(
             Holding.user_id == user.id,
-            Holding.symbol == data.symbol,
+            Holding.key == data.key,
             Holding.kind == data.kind,
         )
     ).scalar_one_or_none()
 
     if existing is None:
         holding = Holding(
+            key=data.key,
             user_id=user.id,
             asset=data.asset,
             symbol=data.symbol,
@@ -69,15 +70,16 @@ def delete_holding(holding_id: int, user: User, db: Session) -> None:
 
 def _enrich_holding(holding: Holding, db: Session) -> HoldingOut:
     if holding.kind == "crypto":
-        priced = crypto_service.get_crypto_price(holding.asset.lower(), db)
+        priced = crypto_service.get_crypto_price(holding.key, db)
         exchange = None
     else:
-        priced = stock_service.get_price(holding.symbol, db)
+        priced = stock_service.get_price(holding.key, db)
         exchange = priced.exchange
 
     return HoldingOut(
         id=holding.id,
         asset=holding.asset,
+        key=holding.key,
         symbol=holding.symbol,
         kind=holding.kind,
         amount=holding.amount,

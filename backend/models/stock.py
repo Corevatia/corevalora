@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 
 class SearchResult(BaseModel):
+    key:str
     name: str
     symbol: str
     exchange: str
@@ -9,6 +10,7 @@ class SearchResult(BaseModel):
 
 
 class Stock(BaseModel):
+    key: str
     symbol: str
     price: float
     date: str

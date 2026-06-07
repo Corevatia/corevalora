@@ -4,6 +4,9 @@ import { request } from "../lib/http";
 export function fetchCryptoPrice(name, options = {}) {
   return request(`/crypto/price/${name}`, options);
 }
+export function fetchCryptoSearch(query, options = {}) {
+  return request(`/crypto/search/${query}`, options);
+}
 
 //stock
 export function fetchStockEOD(symbol, options = {}) {
@@ -59,13 +62,13 @@ export function fetchHoldings(options = {}) {
 }
 
 export function saveHolding(
-  { asset, symbol, kind, amount, buy_price },
+  { key, asset, symbol, kind, amount, buy_price },
   options = {},
 ) {
   return request(`/portfolio/holdings`, {
     ...options,
     method: "POST",
-    json: { asset, symbol, kind, amount, buy_price },
+    json: { key, asset, symbol, kind, amount, buy_price },
   });
 }
 

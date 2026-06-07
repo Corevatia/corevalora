@@ -41,6 +41,7 @@ class UserSession(Base):
 class Holding(Base):
     __tablename__ = 'holdings'
     id: Mapped[int] = mapped_column(primary_key=True)
+    key: Mapped[str] = mapped_column(String(50))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete='CASCADE'))
     asset: Mapped[str] = mapped_column(String(255))
     symbol: Mapped[str] = mapped_column(String(10))
@@ -50,7 +51,7 @@ class Holding(Base):
     kind: Mapped[str] = mapped_column(String(10))
 
     __table_args__ = (
-        UniqueConstraint("user_id", "symbol", "kind"),
+        UniqueConstraint("user_id", "key", "kind"),
     )
 
 

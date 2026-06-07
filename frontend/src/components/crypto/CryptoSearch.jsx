@@ -1,13 +1,24 @@
 import { useState } from "react";
-import { useCryptoprice, useSaveHolding } from "../../features/hooks.js";
+import {
+  useCryptoprice,
+  useCryptoSearch,
+  useSaveHolding,
+} from "../../features/hooks.js";
 import { SearchBar } from "../shared/SearchBar.jsx";
 import AddHoldingForm from "../shared/AddHoldingForm.jsx";
+import CryptoSearchResults from "./CryptoSearchResults.jsx";
 
 export default function CryptoSearch({ onSaved }) {
   const [inputValue, setInputValue] = useState("");
   const [query, setQuery] = useState("");
+  const [selectedKey, setSelectedKey] = useState(null);
 
-  const { data, loading, error } = useCryptoprice(query);
+  const {
+    data: searchdata,
+    loading: searchloading,
+    error: searchError,
+  } = useCryptoSearch(query);
+  const { data, loading, error } = useCryptoprice(selectedKey);
   const { save, error: saveError } = useSaveHolding();
 
   async function handleConfirm({ amount, buyPrice }) {
@@ -15,12 +26,13 @@ export default function CryptoSearch({ onSaved }) {
     try {
       await save({
         asset: data.name,
+        key: data.key,
         symbol: data.symbol,
         kind: "crypto",
         amount,
         buy_price: buyPrice,
       });
-      setInputValue("");
+      setSelectedKey(null);
       setQuery("");
       onSaved?.();
     } catch {
@@ -44,12 +56,19 @@ export default function CryptoSearch({ onSaved }) {
         onKeyDown={onKeyDown}
       />
 
-      {query && (
+      {selectedKey ? (
         <AddHoldingForm
           data={data}
           loading={loading}
           error={error}
           onConfirm={handleConfirm}
+        />
+      ) : (
+        <CryptoSearchResults
+          searchdata={searchdata}
+          loading={searchloading}
+          error={searchError}
+          onSelect={setSelectedKey}
         />
       )}
 

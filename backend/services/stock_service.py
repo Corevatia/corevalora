@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 
 import models.stock as stock
 from services.currency.exchange_currency import get_exchange_currency
-from services.price_cache import read_price, is_fresh, upsert_price
-from services.search_cache import read_search, is_search_fresh, upsert_search
+from services.cache.price_cache import read_price, is_fresh, upsert_price
+from services.cache.search_cache import read_search, is_search_fresh, upsert_search
 from services.providers.marketstack_client import MarketStackClient
 import requests
 from core.config import settings
@@ -28,6 +28,7 @@ def get_stock_search(query: str, db: Session):
     filtered_data = filter_marketstack_search(data) or []
     results = [
         stock.SearchResult(
+            key=e["ticker"],
             name=e["name"],
             symbol=e["ticker"],
             exchange=e["stock_exchange"]["name"],
@@ -43,6 +44,7 @@ def get_stock_search(query: str, db: Session):
 def get_price(symbol: str, db: Session) -> stock.Stock:
     if settings.MOCK_DATA:
         return stock.Stock(symbol="STXY",
+                           key="key",
                            price=123.45,
                            date="2026-02-23",
                            exchange="exch",
@@ -63,7 +65,7 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
         upsert_price(
             db,
             kind="stock",
-            key=symbol,
+            key=e["symbol"],
             symbol=e["symbol"],
             asset_name=e["name"],
             price=float(e["close"]),
@@ -73,6 +75,7 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
         )
 
         return stock.Stock(
+            key=e["symbol"],
             symbol=e["symbol"],
             price=float(e["close"]),
             date=e["date"][:10],
@@ -101,7 +104,7 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
         upsert_price(
             db,
             kind="stock",
-            key=symbol,
+            key=p["symbol"],
             symbol=p["symbol"],
             asset_name=info["name"],
             price=float(p["close"]),
@@ -111,6 +114,7 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
         )
 
         return stock.Stock(
+            key=p["symbol"],
             symbol=p["symbol"],
             price=float(p["close"]),
             date=p["date"][:10],
@@ -129,6 +133,7 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
 
 def _cache_to_stock(cached, stale: bool) -> stock.Stock:
     return stock.Stock(
+        key=cached.key,
         symbol=cached.symbol,
         name=cached.asset_name,
         price=cached.price,
@@ -151,6 +156,7 @@ def search_backup(query: str, db: Session):
     filtered_data = filter_marketstack_search(data) or []
     results = [
         stock.SearchResult(
+            key=e["symbol"],
             name=e["name"],
             symbol=e["symbol"],
             exchange=e["stock_exchange"]["name"],
