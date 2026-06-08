@@ -11,6 +11,10 @@ from services import crypto_service, stock_service
 
 logger = logging.getLogger(__name__)
 
+def compute_avg_price(old_amount: float, old_avg: float, add_amount: float, add_price: float) -> tuple[float, float]:
+    new_amount = old_amount + add_amount
+    new_avg = (old_amount * old_avg + add_amount * add_price) / new_amount
+    return new_amount, new_avg
 
 def list_holdings(user: User, db: Session) -> list[HoldingOut]:
     holdings = db.execute(
@@ -40,11 +44,9 @@ def add_holding(data: HoldingIn, user: User, db: Session) -> HoldingOut:
         )
         db.add(holding)
     else:
-        new_amount = existing.amount + data.amount
-        existing.avg_price = (
-                                     existing.amount * existing.avg_price + data.amount * data.buy_price
-                             ) / new_amount
-        existing.amount = new_amount
+        existing.amount, existing.avg_price = compute_avg_price(
+            existing.amount, existing.avg_price, data.amount, data.buy_price
+        )
         holding = existing
 
     db.commit()
