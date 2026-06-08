@@ -5,3 +5,63 @@
   border-radius: 8px;
   background-color: var(--card-bg);
 }
+
+.headline {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.asset {
+  margin: 0;
+}
+
+.value {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.gain {
+  margin: 0.25rem 0 0;
+  font-weight: 600;
+}
+
+.stale {
+  margin: 0 0 0.5rem;
+  color: red;
+}
+
+.details {
+  margin-top: 0.5rem;
+}
+
+.details > summary {
+  cursor: pointer;
+  color: var(--card-border);
+  user-select: none;
+}
+
+.details > p {
+  margin: 0.25rem 0;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.delete {
+  cursor: pointer;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  background: transparent;
+  color: red;
+}
+
+.delete:hover {
+  background: red;
+  color: white;
+}

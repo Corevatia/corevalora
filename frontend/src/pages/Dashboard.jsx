@@ -3,13 +3,25 @@ import Portfolio from "../components/portfolio/Portfolio";
 import CryptoSearch from "../components/crypto/CryptoSearch";
 import StockSearch from "../components/stock/StockSearch";
 import PortfolioStats from "../components/portfolio/PortfolioStats";
-import { useHoldings, useDeleteHolding } from "../features/hooks";
+import {
+  useHoldings,
+  useDeleteHolding,
+  useCurrencyRate,
+} from "../features/hooks";
 
 export function Dashboard() {
   const [mode, setMode] = useState("stock");
+  const [currency, setCurrency] = useState("EUR");
 
   const { holdings, loading, error, refetch } = useHoldings();
   const { remove } = useDeleteHolding();
+  const {
+    data: ratedata,
+    loading: ratesLoading,
+    error: ratesError,
+  } = useCurrencyRate(currency);
+
+  const rates = ratedata?.rates ?? [];
 
   async function handleDelete(id) {
     try {
@@ -53,7 +65,12 @@ export function Dashboard() {
       >
         {loading && <p>Loading...</p>}
         {error && <p>Could not load holdings</p>}
-        <Portfolio holdings={items} onDelete={handleDelete} />
+        <Portfolio
+          holdings={items}
+          rates={rates}
+          currency={currency}
+          onDelete={handleDelete}
+        />
       </div>
       <div
         style={{
@@ -63,7 +80,14 @@ export function Dashboard() {
           borderLeft: "1px solid #ddd",
         }}
       >
-        <PortfolioStats holdings={items} />
+        <PortfolioStats
+          holdings={items}
+          rates={rates}
+          currency={currency}
+          onCurrencyChange={setCurrency}
+          ratesLoading={ratesLoading}
+          ratesError={ratesError}
+        />
       </div>
     </div>
   );
