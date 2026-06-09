@@ -15,7 +15,7 @@ export default function PortfolioStats({
     (acc, h) => {
       const invested = convert(h.avg_price * h.amount, h.currency, rates);
 
-      const value = convert((h.price ?? 0) * h.amount, h.currencies, rates);
+      const value = convert((h.price ?? 0) * h.amount, h.currency, rates);
 
       if (invested == null || value == null) return acc;
       acc.invested += invested;
