@@ -15,6 +15,7 @@ EXCHANGE_CURRENCY = {
     "XSWX": "CHF",  # SIX Swiss Exchange
 
     # Germany
+    "XETRA": "EUR",  # Xetra
     "XETR": "EUR",  # Xetra
     "XFRA": "EUR",  # Frankfurt
     "XSTU": "EUR",  # Stuttgart
@@ -33,6 +34,7 @@ EXCHANGE_CURRENCY = {
 
     # Spain
     "BMEX": "EUR",
+    "XMAD": "EUR",
 
     # Portugal
     "XLIS": "EUR",
@@ -44,17 +46,11 @@ EXCHANGE_CURRENCY = {
     "XTSE": "CAD",
     "XCNQ": "CAD",
 
-    # Australia
-    "XASX": "AUD",
-
     # Japan
-    "XNGO": "JPY",
-    "XFKA": "JPY",
     "XSAP": "JPY",
-
-    # China
-    "XSHG": "CNY",
-    "XSHE": "CNY",
+    "XJPX": "JPY",
+    "XFKA": "JPY",
+    "XNGO": "JPY",
 
     # Hong Kong
     "XHKG": "HKD",
@@ -92,9 +88,6 @@ EXCHANGE_CURRENCY = {
 
     # Thailand
     "XBKK": "THB",
-
-    # Turkey
-    "XIST": "TRY",
 
     # New Zealand
     "XNZE": "NZD",

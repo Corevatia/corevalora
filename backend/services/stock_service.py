@@ -69,7 +69,7 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
             symbol=e["symbol"],
             asset_name=e["name"],
             price=float(e["close"]),
-            currency=e["price_currency"],
+            currency=get_exchange_currency(e["exchange"]),
             exchange=e["exchange"],
             price_date=e["date"][:10],
         )
@@ -81,7 +81,7 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
             date=e["date"][:10],
             exchange=e["exchange"],
             name=e["name"],
-            currency=e["price_currency"],
+            currency=get_exchange_currency(e["exchange"]),
             stale=False,
         )
     except requests.HTTPError as e:
