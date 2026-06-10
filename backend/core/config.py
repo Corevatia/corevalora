@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     DB_URL: str
     SESSION_LIFETIME_DAYS: int = 14
     COOKIE_SECURE: bool = False
-    CORS_ORIGINS: str = "http://localhost:5137"
+    CORS_ORIGINS: str = "http://localhost:5173"
     CRYPTO_CACHE_TTL_SECONDS: Optional[int] = 120
     STOCK_CACHE_TTL_HOURS: Optional[int] = 24
     SEARCH_CACHE_TTL_HOURS: Optional[int] = 48

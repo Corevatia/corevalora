@@ -18,10 +18,10 @@ class HoldingOut(BaseModel):
     kind: str
     amount: float
     avg_price: float
-    price: float
-    currency: str
+    price: float | None = None
+    currency: str | None = None
     exchange: str | None = None
-    price_date: str
+    price_date: str | None = None
     stale: bool
 
     model_config = ConfigDict(from_attributes=True)

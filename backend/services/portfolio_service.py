@@ -2,6 +2,7 @@ import logging
 
 from fastapi import HTTPException
 from sqlalchemy import select
+from sqlalchemy.exc import OperationalError, InterfaceError
 from sqlalchemy.orm import Session
 from starlette import status
 
@@ -20,8 +21,32 @@ def list_holdings(user: User, db: Session) -> list[HoldingOut]:
     holdings = db.execute(
         select(Holding).where(Holding.user_id == user.id)
     ).scalars().all()
-    return [_enrich_holding(h, db) for h in holdings]
+    return [_safe_enrich_holding(h, db) for h in holdings]
 
+def _safe_enrich_holding(holding: Holding, db: Session) -> HoldingOut:
+    try:
+        return _enrich_holding(holding, db)
+    except (OperationalError, InterfaceError):
+        raise
+    except Exception:
+        logger.exception(
+            "Failed to price holding id=%s key=%s; returning degraded entry",
+            holding.id, holding.key,
+        )
+        return HoldingOut(
+            id=holding.id,
+            asset=holding.asset,
+            key=holding.key,
+            symbol=holding.symbol,
+            kind=holding.kind,
+            amount=holding.amount,
+            avg_price=holding.avg_price,
+            price=None,
+            currency=None,
+            exchange=None,
+            price_date=None,
+            stale=True,
+        )
 
 def add_holding(data: HoldingIn, user: User, db: Session) -> HoldingOut:
     existing = db.execute(
