@@ -1,8 +1,9 @@
 import SearchResult from "../shared/SearchResult";
+import c from "../shared/card.module.css";
 
 function ResultRow({ result, onSelect }) {
   return (
-    <div>
+    <div className={c.card}>
       <SearchResult
         name={result.name}
         symbol={result.symbol}
