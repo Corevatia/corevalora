@@ -82,12 +82,18 @@ docker compose up -d db
 ```bash
 cd backend
 python3 -m venv .venv
-source .venv/bin/activate        # Linux / macOS
-# .venv\Scripts\Activate.ps1     # Windows (PowerShell)
+source .venv/bin/activate         # Linux / macOS
+# source .venv/Scripts/activate   # Windows (Git Bash)
+# .venv\Scripts\Activate.ps1      # Windows (PowerShell)
 pip install -r requirements.txt
-alembic upgrade head             # apply database migrations
-uvicorn main:app --reload        # http://localhost:8000
+alembic upgrade head              # apply database migrations
+uvicorn main:app --reload         # http://localhost:8000
 ```
+
+> On Windows, **Git Bash is the smoother path**: the `source ...` command and
+> the Unix-style `cp` from step 1 work as-is. PowerShell needs an execution-policy
+> tweak before `Activate.ps1` will run (e.g.
+> `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`) and uses backslash paths.
 
 **Frontend** (terminal 2):
 
