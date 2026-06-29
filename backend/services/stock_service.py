@@ -1,4 +1,6 @@
 import logging
+
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 import models.stock as stock
@@ -62,17 +64,24 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
         data = client.get_asset_eod(symbol)
         e = data["data"][0]
 
-        upsert_price(
-            db,
-            kind="stock",
-            key=e["symbol"],
-            symbol=e["symbol"],
-            asset_name=e["name"],
-            price=float(e["close"]),
-            currency=get_exchange_currency(e["exchange"]),
-            exchange=e["exchange"],
-            price_date=e["date"][:10],
-        )
+        try:
+            upsert_price(
+                db,
+                kind="stock",
+                key=e["symbol"],
+                symbol=e["symbol"],
+                asset_name=e["name"],
+                price=float(e["close"]),
+                currency=get_exchange_currency(e["exchange"]),
+                exchange=e["exchange"],
+                price_date=e["date"][:10],
+            )
+        except IntegrityError as e:
+            if cached:
+                logger.warning(f"Database Integrity error for stock {symbol} "
+                                f"serving stale cache: {e}")
+                return _cache_to_stock(cached, stale=True)
+            raise
 
         return stock.Stock(
             key=e["symbol"],
@@ -87,7 +96,7 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
     except requests.HTTPError as e:
         status = e.response.status_code if e.response is not None else None
 
-        if status != 406:
+        if status != 406 and status != 422:
             if status == 404:
                 raise
             if cached:
@@ -101,17 +110,24 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
         infodata = client.search_tickers_backup(symbol)
         info = infodata["data"][0]
 
-        upsert_price(
-            db,
-            kind="stock",
-            key=p["symbol"],
-            symbol=p["symbol"],
-            asset_name=info["name"],
-            price=float(p["close"]),
-            currency=get_exchange_currency(p["exchange"]),
-            exchange=p["exchange"],
-            price_date=p["date"][:10],
-        )
+        try:
+            upsert_price(
+                db,
+                kind="stock",
+                key=p["symbol"],
+                symbol=p["symbol"],
+                asset_name=info["name"],
+                price=float(p["close"]),
+                currency=get_exchange_currency(p["exchange"]),
+                exchange=p["exchange"],
+                price_date=p["date"][:10],
+            )
+        except IntegrityError as e:
+            if cached:
+                logger.warning(f"Database Integrity error for stock {symbol} "
+                                f"serving stale cache: {e}")
+                return _cache_to_stock(cached, stale=True)
+            raise
 
         return stock.Stock(
             key=p["symbol"],

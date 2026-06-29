@@ -18,7 +18,7 @@ router = APIRouter(prefix="/stock", tags=["stock"])
 
 @router.get("/eod_price/{symbol}", response_model=Stock)
 @limiter.limit("60/minute")
-def stock_price(request: Request,symbol: str = Path(min_length=1, max_length=20, pattern=r"^[a-zA-Z0-9.]+$"),
+def stock_price(request: Request,symbol: str = Path(min_length=1, max_length=20, pattern=r"^[a-zA-Z0-9.-]+$"),
                 db: Session = Depends(get_db),
                 current_user: User = Depends(get_current_user),
                 ):

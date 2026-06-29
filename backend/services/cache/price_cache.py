@@ -1,4 +1,7 @@
+import logging
 from datetime import datetime, date, timezone
+
+from sqlalchemy.exc import IntegrityError, DataError
 
 from core.config import settings
 from sqlalchemy import select
@@ -6,6 +9,8 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from db.models import AssetPriceCache
+
+logger = logging.getLogger(__name__)
 
 CACHE_TTL_SECONDS = {"crypto": settings.CRYPTO_CACHE_TTL_SECONDS, "stock": 3600 * settings.STOCK_CACHE_TTL_HOURS}
 
@@ -59,5 +64,10 @@ def upsert_price(
             "cached_at": stmt.excluded.cached_at,
         }
     )
-    db.execute(stmt)
-    db.commit()
+    try:
+        db.execute(stmt)
+        db.commit()
+    except (IntegrityError, DataError) as e:
+        db.rollback()
+        logger.warning("Skipping price cache for %s/%s due to bad upstream data: %s",kind,key,e,)
+        raise
