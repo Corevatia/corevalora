@@ -9,7 +9,11 @@ class Settings(BaseSettings):
     MOCK_DATA: bool = False
     UPSTREAM_DEBUG: bool = False
     LOGGING_LEVEL: str = "INFO"
-    DB_URL: str
+    POSTGRES_USER: str = "corevalora"
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str = "corevalora"
+    POSTGRES_HOST: str = "127.0.0.1"
+    POSTGRES_PORT: str = "5432"
     SESSION_LIFETIME_DAYS: int = 14
     COOKIE_SECURE: bool = False
     CORS_ORIGINS: str = "http://localhost:5173"
@@ -18,7 +22,18 @@ class Settings(BaseSettings):
     SEARCH_CACHE_TTL_HOURS: Optional[int] = 48
     MAINTENANCE_LOOP_HOURS: Optional[int] = 6
 
-    model_config = SettingsConfigDict(env_file=Path(__file__).parent / '../.env', env_file_encoding='utf-8')
+    model_config = SettingsConfigDict(
+        env_file=Path(__file__).parents[2] / '.env',
+        env_file_encoding='utf-8')
+
+
+    @property
+    def DB_URL(self) -> str:
+        return(
+            f"postgresql+psycopg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+            f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        )
+
 
     @property
     def cors_origins_list(self) -> list[str]:

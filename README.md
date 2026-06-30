@@ -42,16 +42,23 @@ React 19 + Vite · FastAPI / Python 3.12 · PostgreSQL · Docker Compose
 
 ### 1. Configure environment
 
+Backend and database share a single root `.env` (read by both docker-compose and
+the backend). Copy the example and fill it in:
+
 ```bash
-cp .env.example .env                 # set POSTGRES_PASSWORD in .env
-cp backend/.env.example backend/.env # set MARKETSTACK_API_KEY and COINCAP_API_KEY in backend/.env
+cp .env.example .env  # then edit it
 ```
 
 > PowerShell: use `Copy-Item .env.example .env` instead of `cp`.
 
-You need two free API keys: [MarketStack](https://marketstack.com) (stocks) and
-[CoinCap](https://pro.coincap.io) (crypto). For **Option B**, also set the
-password in `backend/.env`'s `DB_URL` to match `POSTGRES_PASSWORD`.
+At minimum set `POSTGRES_PASSWORD` and two free API keys:
+[MarketStack](https://marketstack.com) (stocks) and
+[CoinCap](https://pro.coincap.io) (crypto). The database connection URL is built
+automatically from the `POSTGRES_*` values, so there's no password to keep in sync.
+
+The **frontend** has its own optional `frontend/.env` (`VITE_API_URL`). You only
+need it if the backend isn't at the default `http://localhost:8000`; otherwise
+skip it (`cp frontend/.env.example frontend/.env` to override).
 
 ### Option A — Docker (recommended)
 

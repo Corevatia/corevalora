@@ -13,7 +13,7 @@ jobs:
     env:
       MARKETSTACK_API_KEY: ci-dummy
       COINCAP_API_KEY: ci-dummy
-      DB_URL: postgresql+psycopg://test:test@localhost:5432/test
+      POSTGRES_PASSWORD: test
 
     steps:
       - name: Checkout

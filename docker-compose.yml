@@ -18,7 +18,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-corevalora} -d ${POSTGRES_DB:-corevalora}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-corevalora} -d ${POSTGRES_DB:-corevalora}",
+        ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -27,13 +31,14 @@ services:
   backend:
     build: ./backend
     container_name: corevalora-backend
-    # API keys and other config come from backend/.env ...
+    # API keys, DB credentials and backend config come from root .env ...
     env_file:
-      - ./backend/.env
+      - ./.env
     # ... but these are overridden here so they're correct inside the compose network.
     environment:
       # Inside the network the database host is "db", not localhost.
-      DB_URL: postgresql+psycopg://${POSTGRES_USER:-corevalora}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-corevalora}
+      # assembles DB_URL from these parts (see backend/core/config.py)
+      POSTGRES_HOST: db
       # Must match the origin the browser loads the frontend from (see frontend port).
       CORS_ORIGINS: http://localhost:5173
     logging: *default-logging
@@ -45,7 +50,6 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
-
 
   frontend:
     build:
