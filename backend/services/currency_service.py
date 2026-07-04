@@ -7,7 +7,7 @@ from db.models import CurrencyRate
 
 from services.providers.frankfurter_client import FrankfurterClient
 import models.currency as currency
-import services.currency.currency_rates_dev as currency_rates_dev
+import services.mocks.currency_rates_mock as currency_rates_dev
 from core.config import settings
 
 client = FrankfurterClient()

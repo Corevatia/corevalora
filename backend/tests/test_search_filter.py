@@ -1,4 +1,4 @@
-from services.search_filter import filter_marketstack_search
+from services.exchanges.search_filter import filter_marketstack_search
 
 
 def _item(mic, has_eod=True):

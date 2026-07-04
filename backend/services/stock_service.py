@@ -4,14 +4,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 import models.stock as stock
-from services.currency.exchange_currency import get_exchange_currency
+from services.exchanges.exchanges import get_exchange_currency
 from services.cache.price_cache import read_price, is_fresh, upsert_price
 from services.cache.search_cache import read_search, is_search_fresh, upsert_search
+from services.mocks.stock_mock import get_stock_search_results_mock, get_stock_mock
 from services.providers.marketstack_client import MarketStackClient
 import requests
 from core.config import settings
 
-from services.search_filter import filter_marketstack_search
+from services.exchanges.search_filter import filter_marketstack_search
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ client = MarketStackClient(api_key=settings.MARKETSTACK_API_KEY)
 
 def get_stock_search(query: str, db: Session):
     if settings.MOCK_DATA:
-        return [stock.SearchResult(name="StockXY", symbol="STXY", exchange="EXCHANGE", mic="EXCH")]
+        return get_stock_search_results_mock()
 
     cached = read_search(db, kind="stock", query=query)
     if cached and is_search_fresh(cached):
@@ -45,15 +46,7 @@ def get_stock_search(query: str, db: Session):
 
 def get_price(symbol: str, db: Session) -> stock.Stock:
     if settings.MOCK_DATA:
-        return stock.Stock(symbol="STXY",
-                           key="key",
-                           price=123.45,
-                           date="2026-02-23",
-                           exchange="exch",
-                           name="StockXY",
-                           currency="CHF",
-                           stale=False,
-                           )
+        return get_stock_mock()
 
     cached = read_price(db, kind="stock", key=symbol)
 
@@ -162,7 +155,7 @@ def _cache_to_stock(cached, stale: bool) -> stock.Stock:
 
 def search_backup(query: str, db: Session):
     if settings.MOCK_DATA:
-        return [stock.SearchResult(name="StockXY", symbol="STXY", exchange="EXCHANGE", mic="EXCH")]
+        return get_stock_search_results_mock()
 
     cached = read_search(db, kind="bstock", query=query)
     if cached and is_search_fresh(cached):

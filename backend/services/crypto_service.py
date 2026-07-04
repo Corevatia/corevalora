@@ -4,6 +4,7 @@ import requests
 from sqlalchemy.orm import Session
 
 from services.cache.price_cache import read_price, is_fresh, upsert_price
+from services.mocks.crypto_mock import get_crypto_mock, get_crypto_search_results_mock
 from services.providers.coincap_client import CoinCapClient
 import models.crypto as crypto
 from datetime import datetime, timezone
@@ -17,15 +18,7 @@ client = CoinCapClient(api_key=settings.COINCAP_API_KEY)
 
 def get_crypto_price(asset_id: str, db: Session) -> crypto.Crypto:
     if settings.MOCK_DATA:
-        return crypto.Crypto(
-            key="key",
-            symbol="XYC",
-            name="XYCoin",
-            price=123.45,
-            currency="USD",
-            date="2021-09-22",
-            stale=False,
-        )
+        return get_crypto_mock()
 
     cached = read_price(db, kind="crypto", key=asset_id)
 
@@ -86,7 +79,7 @@ def _cache_to_crypto(cached, stale: bool) -> crypto.Crypto:
 
 def get_crypto_search(query: str, db: Session):
     if settings.MOCK_DATA:
-        return [crypto.SearchResult(symbol="KYC", name="KYCoin",rank=123)]
+        return get_crypto_search_results_mock()
 
     cached = read_search(db, kind="crypto", query=query)
     if cached and is_search_fresh(cached):
