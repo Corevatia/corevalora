@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     MAINTENANCE_LOOP_HOURS: Optional[int] = 6
 
     model_config = SettingsConfigDict(
-        env_file=Path(__file__).parents[2] / '.env',
+        env_file=Path(__file__).resolve().parents[2] / '.env',
         env_file_encoding='utf-8')
 
 

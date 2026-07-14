@@ -12,3 +12,4 @@ bcrypt<4.1
 email-validator
 slowapi
 pytest
+httpx
