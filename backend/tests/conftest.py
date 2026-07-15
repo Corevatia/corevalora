@@ -12,6 +12,7 @@ from core.auth_deps import SESSION_COOKIE_NAME
 from db import models
 from db.database import get_db
 from main import app
+from services.auth.passwords import hash_password
 from services.auth.sessions import create_session
 
 TEST_DB_URL = os.environ.get(
@@ -55,7 +56,7 @@ def db():
 
 @pytest.fixture
 def user(db):
-    u = models.User(email="test@example.com", hashed_password="x" * 60)
+    u = models.User(email="test@example.com", hashed_password=hash_password("testtest"))
     db.add(u)
     db.flush()
     return u
