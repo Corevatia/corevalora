@@ -62,6 +62,13 @@ def user(db):
     return u
 
 @pytest.fixture
+def other_user(db):
+    u = models.User(email="other@example.com", hashed_password=hash_password("testtest"))
+    db.add(u)
+    db.flush()
+    return u
+
+@pytest.fixture
 def holding(db, user):
     h = models.Holding(
         key="bitcoin",
@@ -70,6 +77,21 @@ def holding(db, user):
         symbol="BTC",
         amount=2.5,
         avg_price=40000,
+        kind="crypto",
+    )
+    db.add(h)
+    db.flush()
+    return h
+
+@pytest.fixture
+def other_holding(db, other_user):
+    h = models.Holding(
+        key="ethereum",
+        user_id=other_user.id,
+        asset="Ethereum",
+        symbol="ETH",
+        amount=5,
+        avg_price=2000,
         kind="crypto",
     )
     db.add(h)

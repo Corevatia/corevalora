@@ -96,6 +96,7 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
                 logger.warning(f"Upstream HTTP error for stock {symbol} "
                                f"serving stale cache: ´{e}")
                 return _cache_to_stock(cached, stale=True)
+            raise
 
         pricedata = client.get_asset_price_backup(symbol)
         p = pricedata["data"][0]
