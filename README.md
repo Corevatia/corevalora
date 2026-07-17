@@ -32,13 +32,7 @@ React 19 + Vite · FastAPI / Python 3.12 · PostgreSQL · Docker Compose
 
 ### Prerequisites
 
-- **Docker** — Docker Desktop on macOS/Windows, Docker Engine on Linux.
-  Required for Option A, and for the database in Option B.
-- For Option B only: **Python 3.12** and **Node 20+**.
-
-> On **Windows**, run the commands below in **Git Bash** (ships with Git for
-> Windows) so Unix commands like `cp` work. PowerShell alternatives are noted
-> where they differ.
+**Docker** — Docker Desktop on macOS/Windows, Docker Engine on Linux. Nothing else.
 
 ### 1. Configure environment
 
@@ -46,69 +40,27 @@ Backend and database share a single root `.env` (read by both docker-compose and
 the backend). Copy the example and fill it in:
 
 ```bash
-cp .env.example .env  # then edit it
+cp .env.example .env    # PowerShell: Copy-Item .env.example .env
 ```
-
-> PowerShell: use `Copy-Item .env.example .env` instead of `cp`.
 
 At minimum set `POSTGRES_PASSWORD` and two free API keys:
 [MarketStack](https://marketstack.com) (stocks) and
 [CoinCap](https://pro.coincap.io) (crypto). The database connection URL is built
 automatically from the `POSTGRES_*` values, so there's no password to keep in sync.
 
-The **frontend** has its own optional `frontend/.env` (`VITE_API_URL`). You only
-need it if the backend isn't at the default `http://localhost:8000`; otherwise
-skip it (`cp frontend/.env.example frontend/.env` to override).
-
-### Option A — Docker (recommended)
+### 2. Start it
 
 Brings up frontend, backend and PostgreSQL together:
 
 ```bash
-docker compose up
+docker compose up       # add --build after changing code or dependencies
 ```
 
-> After changing code or dependencies, add `--build` to rebuild the images:
-> `docker compose up --build`.
 - Frontend → http://localhost:5173
 - Interactive API docs → http://localhost:8000/docs
 
-### Option B — Run manually
-
-Best when you're **actively developing**: backend and frontend run as separate
-processes with **hot-reload**, so changes to either show up instantly without
-rebuilding a container. Start only the database with Docker, then run the two
-services natively in separate terminals.
-
-```bash
-docker compose up -d db
-```
-
-**Backend** (terminal 1):
-
-```bash
-cd backend
-python3 -m venv .venv
-source .venv/bin/activate         # Linux / macOS
-# source .venv/Scripts/activate   # Windows (Git Bash)
-# .venv\Scripts\Activate.ps1      # Windows (PowerShell)
-pip install -r requirements.txt
-alembic upgrade head              # apply database migrations
-uvicorn main:app --reload         # http://localhost:8000
-```
-
-> On Windows, **Git Bash is the smoother path**: the `source ...` command and
-> the Unix-style `cp` from step 1 work as-is. PowerShell needs an execution-policy
-> tweak before `Activate.ps1` will run (e.g.
-> `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`) and uses backslash paths.
-
-**Frontend** (terminal 2):
-
-```bash
-cd frontend
-npm install
-npm run dev                      # http://localhost:5173
-```
+> Working on the code? Backend and frontend also run natively with hot-reload, and a
+> `Makefile` wraps the everyday commands — see **[DEVELOPMENT.md](DEVELOPMENT.md)**.
 
 
 ---
@@ -163,6 +115,10 @@ portfolios and the market-data cache all live in PostgreSQL.
 - **Exchange → currency mapping** (`services/currency/`) — the trading currency
   is derived from the exchange's MIC code instead of trusting MarketStack's own
   currency field, which is unreliable. This also guards against unsupported currencies entering valuation.
+- **Tested against a real PostgreSQL** (`backend/tests/`) — the suite runs the actual
+  migrations against a throwaway database container and rolls back after each test,
+  rather than mocking the database or substituting SQLite, so Postgres-specific
+  behaviour is covered. See [DEVELOPMENT.md](DEVELOPMENT.md#testing).
 
 The interactive API reference (FastAPI auto-generated) is available at
 [`/docs`](http://localhost:8000/docs) when the backend is running.

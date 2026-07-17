@@ -89,6 +89,8 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
     except requests.HTTPError as e:
         status = e.response.status_code if e.response is not None else None
 
+        # MarketStack switched the "this symbol is v1-only" response from 406 to 422
+        # without notice. Both are accepted until it is clear which one stays.
         if status != 406 and status != 422:
             if status == 404:
                 raise

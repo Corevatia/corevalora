@@ -20,6 +20,7 @@ def test_holdings_returns_only_own_holdings(auth_client, holding, other_holding,
 
     assert resp.status_code == 200
     assert [h["id"] for h in resp.json()] == [holding.id]
+    assert resp.json()[0]["price"] == 100
 
 def test_delete_other_user_holding_is_not_found(auth_client, holding, other_holding, db):
     resp = auth_client.delete(f'/portfolio/holdings/{other_holding.id}')

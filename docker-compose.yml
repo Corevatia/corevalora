@@ -28,6 +28,25 @@ services:
       retries: 10
     restart: unless-stopped
 
+  db-test:
+    image: postgres:17
+    container_name: corevalora-pg-test
+    profiles: ["test"]
+    environment:
+      POSTGRES_USER: corevalora
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: corevalora_test
+    logging: *default-logging
+    ports:
+      - "127.0.0.1:5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U corevalora -d corevalora_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   backend:
     build: ./backend
     container_name: corevalora-backend

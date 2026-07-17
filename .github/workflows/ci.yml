@@ -14,7 +14,7 @@ jobs:
       MARKETSTACK_API_KEY: ci-dummy
       COINCAP_API_KEY: ci-dummy
       POSTGRES_PASSWORD: test
-      TEST_DB_URL: postgresql+psycopg://corevalora:test@localhost:5432/corevalora_test
+      TEST_DB_URL: postgresql+psycopg://corevalora:test@localhost:5433/corevalora_test
 
     services:
       postgres:
@@ -24,7 +24,7 @@ jobs:
           POSTGRES_PASSWORD: test
           POSTGRES_DB: corevalora_test
         ports:
-          - 5432:5432
+          - 5433:5432
         options: >-
           --health-cmd "pg_isready -U corevalora"
           --health-interval 10s

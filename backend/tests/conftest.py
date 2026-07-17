@@ -6,9 +6,11 @@ from alembic import command
 from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import sessionmaker
 
 from core.auth_deps import SESSION_COOKIE_NAME
+from core.rate_limit import limiter
 from db import models
 from db.database import get_db
 from main import app
@@ -17,14 +19,29 @@ from services.auth.sessions import create_session
 
 TEST_DB_URL = os.environ.get(
     "TEST_DB_URL",
-    "postgresql+psycopg://corevalora:test@localhost:5432/corevalora_test",
+    "postgresql+psycopg://corevalora:test@localhost:5433/corevalora_test",
 )
+
+_db_name = make_url(TEST_DB_URL).database or ""
+if not _db_name.endswith("_test"):
+    raise RuntimeError(
+        f"Refusing to run against database {_db_name!r}: this suite drops the public "
+        f"schema. TEST_DB_URL must name a database ending in '_test'."
+    )
+
 
 engine = create_engine(TEST_DB_URL)
 TestingSessionLocal = sessionmaker(bind=engine)
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 ALEMBIC_INI = BACKEND_DIR / "alembic.ini"
+
+@pytest.fixture(autouse=True)
+def disable_rate_limits():
+    limiter.enabled = False
+    yield
+    limiter.enabled = True
+
 
 @pytest.fixture(scope="session", autouse=True)
 def _migrate_test_db():

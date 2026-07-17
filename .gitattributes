@@ -1,0 +1,4 @@
+# Store text files with LF in the repository and check them out with LF everywhere,
+# including Windows. Without this, Git for Windows checks out CRLF by default, which
+# breaks the Makefile and any shell script under Git Bash and WSL.
+* text=auto eol=lf
