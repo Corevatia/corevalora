@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 class SearchResult(BaseModel):
-    key:str
+    key: str
     name: str
     symbol: str
     exchange: str

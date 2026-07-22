@@ -1,6 +1,6 @@
-from typing import Optional
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -17,26 +17,27 @@ class Settings(BaseSettings):
     SESSION_LIFETIME_DAYS: int = 14
     COOKIE_SECURE: bool = False
     CORS_ORIGINS: str = "http://localhost:5173"
-    CRYPTO_CACHE_TTL_SECONDS: Optional[int] = 120
-    STOCK_CACHE_TTL_HOURS: Optional[int] = 24
-    SEARCH_CACHE_TTL_HOURS: Optional[int] = 48
-    MAINTENANCE_LOOP_HOURS: Optional[int] = 6
+    CRYPTO_CACHE_TTL_SECONDS: int | None = 120
+    STOCK_CACHE_TTL_HOURS: int | None = 24
+    SEARCH_CACHE_TTL_HOURS: int | None = 48
+    MAINTENANCE_LOOP_HOURS: int | None = 6
 
     model_config = SettingsConfigDict(
-        env_file=Path(__file__).resolve().parents[2] / '.env',
-        env_file_encoding='utf-8')
-
+        env_file=Path(__file__).resolve().parents[2] / ".env", env_file_encoding="utf-8"
+    )
 
     @property
     def DB_URL(self) -> str:
-        return(
+        return (
             f"postgresql+psycopg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
             f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         )
 
-
     @property
     def cors_origins_list(self) -> list[str]:
-        return [origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()]
+        return [
+            origin.strip() for origin in self.CORS_ORIGINS.split(",") if origin.strip()
+        ]
+
 
 settings = Settings()

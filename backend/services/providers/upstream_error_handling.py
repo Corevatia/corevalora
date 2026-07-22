@@ -1,5 +1,7 @@
-import requests
 import logging
+
+import requests
+
 from core.config import settings
 
 logger = logging.getLogger(__name__)

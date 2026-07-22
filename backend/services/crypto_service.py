@@ -1,15 +1,15 @@
 import logging
+from datetime import UTC, datetime
 
 import requests
 from sqlalchemy.orm import Session
 
-from services.cache.price_cache import read_price, is_fresh, upsert_price
+import models.crypto as crypto
+from core.config import settings
+from services.cache.price_cache import is_fresh, read_price, upsert_price
+from services.cache.search_cache import is_search_fresh, read_search, upsert_search
 from services.mocks.crypto_mock import get_crypto_mock, get_crypto_search_results_mock
 from services.providers.coincap_client import CoinCapClient
-import models.crypto as crypto
-from datetime import datetime, timezone
-from core.config import settings
-from services.cache.search_cache import read_search, is_search_fresh, upsert_search
 
 logger = logging.getLogger(__name__)
 
@@ -46,21 +46,23 @@ def get_crypto_price(asset_id: str, db: Session) -> crypto.Crypto:
             name=asset["name"],
             price=float(asset["priceUsd"]),
             currency="USD",
-            date=datetime.now(timezone.utc).isoformat(),
+            date=datetime.now(UTC).isoformat(),
             stale=False,
         )
     except requests.HTTPError as e:
         if e.response is not None and e.response.status_code == 404:
             raise
         if cached:
-            logger.warning(f"Upstream HTTP error for crypto {asset_id} "
-                           f"serving stale cache: {e}")
+            logger.warning(
+                f"Upstream HTTP error for crypto {asset_id} serving stale cache: {e}"
+            )
             return _cache_to_crypto(cached, stale=True)
         raise
     except (requests.ConnectionError, requests.Timeout) as e:
         if cached:
-            logger.warning(f"Upstream unreachable for crypto {asset_id} "
-                           f"serving stale cache: {e}")
+            logger.warning(
+                f"Upstream unreachable for crypto {asset_id} serving stale cache: {e}"
+            )
             return _cache_to_crypto(cached, stale=True)
         raise
 
@@ -83,7 +85,7 @@ def get_crypto_search(query: str, db: Session):
 
     cached = read_search(db, kind="crypto", query=query)
     if cached and is_search_fresh(cached):
-        return  [crypto.SearchResult(**r) for r in cached.results]
+        return [crypto.SearchResult(**r) for r in cached.results]
 
     data = client.search_assets(query)
     results = [
@@ -95,7 +97,8 @@ def get_crypto_search(query: str, db: Session):
         )
         for e in data["data"]
     ]
-    upsert_search(db, kind="crypto", query=query, results=[r.model_dump() for r in results])
+    upsert_search(
+        db, kind="crypto", query=query, results=[r.model_dump() for r in results]
+    )
 
     return results
-

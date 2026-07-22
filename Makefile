@@ -19,6 +19,7 @@ help:
 	@echo "make frontend  Run the Vite dev server on :5173 (second terminal)"
 	@echo "make test      Start the test database and run pytest"
 	@echo "               e.g. make test PYTEST_ARGS='tests/auth -x'"
+	@echo "make lint      Run ruff: the same lint + format checks CI runs"
 	@echo "make migrate   Apply Alembic migrations to the dev database"
 	@echo "make down      Stop the containers"
 
@@ -57,6 +58,11 @@ dev: migrate
 
 test: db-test
 	cd backend && .venv/bin/pytest $(PYTEST_ARGS)
+
+lint:
+	cd backend && .venv/bin/ruff check
+	cd backend && .venv/bin/ruff format --check
+
 
 # The profile has to be named here, otherwise db-test is not part of the target set.
 down:

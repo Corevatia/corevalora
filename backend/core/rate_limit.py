@@ -3,7 +3,6 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 
-
 def client_key(request: Request) -> str:
     user = getattr(request.state, "user", None)
     if user is not None:

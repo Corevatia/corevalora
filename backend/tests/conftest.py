@@ -2,13 +2,13 @@ import os
 from pathlib import Path
 
 import pytest
-from alembic import command
 from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import make_url
 from sqlalchemy.orm import sessionmaker
 
+from alembic import command
 from core.auth_deps import SESSION_COOKIE_NAME
 from core.rate_limit import limiter
 from db import models
@@ -35,6 +35,7 @@ TestingSessionLocal = sessionmaker(bind=engine)
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 ALEMBIC_INI = BACKEND_DIR / "alembic.ini"
+
 
 @pytest.fixture(autouse=True)
 def disable_rate_limits():
@@ -71,6 +72,7 @@ def db():
     transaction.rollback()
     connection.close()
 
+
 @pytest.fixture
 def user(db):
     u = models.User(email="test@example.com", hashed_password=hash_password("testtest"))
@@ -78,12 +80,16 @@ def user(db):
     db.flush()
     return u
 
+
 @pytest.fixture
 def other_user(db):
-    u = models.User(email="other@example.com", hashed_password=hash_password("testtest"))
+    u = models.User(
+        email="other@example.com", hashed_password=hash_password("testtest")
+    )
     db.add(u)
     db.flush()
     return u
+
 
 @pytest.fixture
 def holding(db, user):
@@ -100,6 +106,7 @@ def holding(db, user):
     db.flush()
     return h
 
+
 @pytest.fixture
 def other_holding(db, other_user):
     h = models.Holding(
@@ -115,11 +122,13 @@ def other_holding(db, other_user):
     db.flush()
     return h
 
+
 @pytest.fixture
 def client(db):
     app.dependency_overrides[get_db] = lambda: db
     yield TestClient(app)
     app.dependency_overrides.clear()
+
 
 @pytest.fixture
 def auth_client(client, db, user):

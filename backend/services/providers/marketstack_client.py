@@ -1,4 +1,5 @@
 import requests
+
 from services.providers.upstream_error_handling import upstream_error_handling
 
 
@@ -8,7 +9,10 @@ class MarketStackClient:
         self.baseurl = "https://api.marketstack.com"
         self.api_key = api_key
 
-    def search_tickers(self, query: str, ):
+    def search_tickers(
+        self,
+        query: str,
+    ):
         url = f"{self.baseurl}/v2/tickerslist"
         params = {"search": query, "access_key": self.api_key}
         r = self.session.get(url, params=params, timeout=5)
@@ -27,7 +31,10 @@ class MarketStackClient:
         return r.json()
 
     # Backup (Marketstack v1)
-    def search_tickers_backup(self, query: str, ):
+    def search_tickers_backup(
+        self,
+        query: str,
+    ):
         url = f"{self.baseurl}/v1/tickers"
         params = {"search": query, "access_key": self.api_key}
         r = self.session.get(url, params=params, timeout=5)

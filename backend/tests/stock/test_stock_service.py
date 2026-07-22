@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 
 import pytest
 import requests
@@ -25,12 +25,16 @@ class FakeClient:
 
     def get_asset_price_backup(self, symbol):
         self.backup_calls += 1
-        return {"data": [{
-            "symbol": symbol,
-            "close": "150.25",
-            "exchange": "XNAS",
-            "date": "2026-07-15T00:00:00+0000",
-        }]}
+        return {
+            "data": [
+                {
+                    "symbol": symbol,
+                    "close": "150.25",
+                    "exchange": "XNAS",
+                    "date": "2026-07-15T00:00:00+0000",
+                }
+            ]
+        }
 
     def search_tickers_backup(self, symbol):
         return {"data": [{"name": "Apple Inc"}]}
@@ -46,7 +50,7 @@ def stale_cache_row():
         currency="USD",
         exchange="XNAS",
         price_date=date(2026, 7, 1),
-        cached_at=datetime.now(timezone.utc)
+        cached_at=datetime.now(UTC)
         - timedelta(seconds=CACHE_TTL_SECONDS["stock"] + 60),
     )
 
@@ -61,6 +65,7 @@ def test_upstream_error_without_cache_does_not_fall_back_to_v1(db, monkeypatch):
 
     assert fake.backup_calls == 0
 
+
 def test_unsupported_symbol_falls_back_to_v1(db, monkeypatch):
     fake = FakeClient(http_error(422))
     monkeypatch.setattr(settings, "MOCK_DATA", False)
@@ -72,6 +77,7 @@ def test_unsupported_symbol_falls_back_to_v1(db, monkeypatch):
     assert result.price == 150.25
     assert result.currency == "USD"
     assert result.stale is False
+
 
 def test_upstream_error_with_cache_serves_stale(db, monkeypatch):
     db.add(stale_cache_row())

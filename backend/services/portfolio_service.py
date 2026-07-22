@@ -2,7 +2,7 @@ import logging
 
 from fastapi import HTTPException
 from sqlalchemy import select
-from sqlalchemy.exc import OperationalError, InterfaceError
+from sqlalchemy.exc import InterfaceError, OperationalError
 from sqlalchemy.orm import Session
 from starlette import status
 
@@ -12,16 +12,21 @@ from services import crypto_service, stock_service
 
 logger = logging.getLogger(__name__)
 
-def compute_avg_price(old_amount: float, old_avg: float, add_amount: float, add_price: float) -> tuple[float, float]:
+
+def compute_avg_price(
+    old_amount: float, old_avg: float, add_amount: float, add_price: float
+) -> tuple[float, float]:
     new_amount = old_amount + add_amount
     new_avg = (old_amount * old_avg + add_amount * add_price) / new_amount
     return new_amount, new_avg
 
+
 def list_holdings(user: User, db: Session) -> list[HoldingOut]:
-    holdings = db.execute(
-        select(Holding).where(Holding.user_id == user.id)
-    ).scalars().all()
+    holdings = (
+        db.execute(select(Holding).where(Holding.user_id == user.id)).scalars().all()
+    )
     return [_safe_enrich_holding(h, db) for h in holdings]
+
 
 def _safe_enrich_holding(holding: Holding, db: Session) -> HoldingOut:
     try:
@@ -31,7 +36,8 @@ def _safe_enrich_holding(holding: Holding, db: Session) -> HoldingOut:
     except Exception:
         logger.exception(
             "Failed to price holding id=%s key=%s; returning degraded entry",
-            holding.id, holding.key,
+            holding.id,
+            holding.key,
         )
         return HoldingOut(
             id=holding.id,
@@ -47,6 +53,7 @@ def _safe_enrich_holding(holding: Holding, db: Session) -> HoldingOut:
             price_date=None,
             stale=True,
         )
+
 
 def add_holding(data: HoldingIn, user: User, db: Session) -> HoldingOut:
     existing = db.execute(
@@ -89,7 +96,9 @@ def delete_holding(holding_id: int, user: User, db: Session) -> None:
 
     if holding is None:
         logger.error(f"Holding not found while deleting id:{holding_id}")
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Holding not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Holding not found"
+        )
 
     db.delete(holding)
     db.commit()

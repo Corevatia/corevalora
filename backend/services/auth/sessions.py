@@ -1,16 +1,18 @@
 import secrets
-from db.models import UserSession
-from sqlalchemy.orm import Session
+from datetime import UTC, datetime, timedelta
+
 from sqlalchemy import delete
-from datetime import datetime, timedelta, timezone
+from sqlalchemy.orm import Session
+
 from core.config import settings
+from db.models import UserSession
 
 SESSION_LIFETIME = timedelta(days=settings.SESSION_LIFETIME_DAYS)
 
 
 def create_session(db: Session, user_id: int) -> UserSession:
     session_id = secrets.token_urlsafe(32)
-    expire_at = datetime.now(timezone.utc) + SESSION_LIFETIME
+    expire_at = datetime.now(UTC) + SESSION_LIFETIME
 
     session = UserSession(
         id=session_id,
@@ -27,7 +29,7 @@ def get_session(db: Session, session_id: str) -> UserSession | None:
     if session is None:
         return None
 
-    if session.expires_at < datetime.now(timezone.utc):
+    if session.expires_at < datetime.now(UTC):
         db.delete(session)
         db.commit()
         return None
@@ -41,11 +43,11 @@ def delete_session(db, session_id) -> None:
         db.delete(session)
         db.commit()
 
+
 def delete_expired_sessions(db: Session) -> int:
     result = db.execute(
-        delete(UserSession).where(UserSession.expires_at < datetime.now(timezone.utc))
-        )
+        delete(UserSession).where(UserSession.expires_at < datetime.now(UTC))
+    )
 
     db.commit()
     return result.rowcount
-

@@ -13,3 +13,4 @@ email-validator
 slowapi
 pytest
 httpx
+ruff

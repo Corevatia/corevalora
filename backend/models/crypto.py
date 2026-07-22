@@ -10,6 +10,7 @@ class Crypto(BaseModel):
     date: str
     stale: bool = False
 
+
 class SearchResult(BaseModel):
     key: str
     name: str

@@ -4,6 +4,7 @@ from services.portfolio_service import compute_avg_price
 def test_equal_amounts_average_in_the_middle():
     amount, avg = compute_avg_price(10, 100, 10, 200)
     assert amount == 20
+
     assert avg == 150
 
 

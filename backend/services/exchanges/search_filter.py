@@ -10,7 +10,7 @@ def filter_marketstack_search(search_json: dict):
         item
         for item in data
         if item.get("has_eod") is True
-           and item.get("stock_exchange", {}).get("mic") in SUPPORTED_MICS
+        and item.get("stock_exchange", {}).get("mic") in SUPPORTED_MICS
     ]
 
     return filtered

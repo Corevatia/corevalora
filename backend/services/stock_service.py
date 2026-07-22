@@ -1,18 +1,17 @@
 import logging
 
+import requests
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 import models.stock as stock
-from services.exchanges.exchanges import get_exchange_currency
-from services.cache.price_cache import read_price, is_fresh, upsert_price
-from services.cache.search_cache import read_search, is_search_fresh, upsert_search
-from services.mocks.stock_mock import get_stock_search_results_mock, get_stock_mock
-from services.providers.marketstack_client import MarketStackClient
-import requests
 from core.config import settings
-
+from services.cache.price_cache import is_fresh, read_price, upsert_price
+from services.cache.search_cache import is_search_fresh, read_search, upsert_search
+from services.exchanges.exchanges import get_exchange_currency
 from services.exchanges.search_filter import filter_marketstack_search
+from services.mocks.stock_mock import get_stock_mock, get_stock_search_results_mock
+from services.providers.marketstack_client import MarketStackClient
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +38,9 @@ def get_stock_search(query: str, db: Session):
         )
         for e in filtered_data
     ]
-    upsert_search(db, kind="stock", query=query, results=[r.model_dump() for r in results])
+    upsert_search(
+        db, kind="stock", query=query, results=[r.model_dump() for r in results]
+    )
 
     return results
 
@@ -71,8 +72,10 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
             )
         except IntegrityError as e:
             if cached:
-                logger.warning(f"Database Integrity error for stock {symbol} "
-                                f"serving stale cache: {e}")
+                logger.warning(
+                    f"Database Integrity error for stock {symbol} "
+                    f"serving stale cache: {e}"
+                )
                 return _cache_to_stock(cached, stale=True)
             raise
 
@@ -95,8 +98,9 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
             if status == 404:
                 raise
             if cached:
-                logger.warning(f"Upstream HTTP error for stock {symbol} "
-                               f"serving stale cache: ´{e}")
+                logger.warning(
+                    f"Upstream HTTP error for stock {symbol} serving stale cache: ´{e}"
+                )
                 return _cache_to_stock(cached, stale=True)
             raise
 
@@ -120,8 +124,10 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
             )
         except IntegrityError as e:
             if cached:
-                logger.warning(f"Database Integrity error for stock {symbol} "
-                                f"serving stale cache: {e}")
+                logger.warning(
+                    f"Database Integrity error for stock {symbol} "
+                    f"serving stale cache: {e}"
+                )
                 return _cache_to_stock(cached, stale=True)
             raise
 
@@ -137,8 +143,9 @@ def get_price(symbol: str, db: Session) -> stock.Stock:
         )
     except (requests.ConnectionError, requests.Timeout) as e:
         if cached:
-            logger.warning(f"Upstream unreachable for stock {symbol} "
-                           f"serving stale cache: {e}")
+            logger.warning(
+                f"Upstream unreachable for stock {symbol} serving stale cache: {e}"
+            )
             return _cache_to_stock(cached, stale=True)
         raise
 
@@ -176,6 +183,8 @@ def search_backup(query: str, db: Session):
         )
         for e in filtered_data
     ]
-    upsert_search(db, kind="bstock", query=query, results=[r.model_dump() for r in results])
+    upsert_search(
+        db, kind="bstock", query=query, results=[r.model_dump() for r in results]
+    )
 
     return results
