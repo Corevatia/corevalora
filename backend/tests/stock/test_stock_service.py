@@ -1,23 +1,18 @@
 from datetime import UTC, date, datetime, timedelta
 
 import pytest
-import requests
 
 from core.config import settings
+from core.errors import AssetNotFound, ProviderRejected, UpstreamUnavailable
 from db.models import AssetPriceCache
 from services import stock_service
 from services.cache.price_cache import CACHE_TTL_SECONDS
 
 
-def http_error(status_code):
-    response = requests.Response()
-    response.status_code = status_code
-    return requests.HTTPError(response=response)
-
-
 class FakeClient:
-    def __init__(self, eod_error):
+    def __init__(self, eod_error, backup_error=None):
         self.eod_error = eod_error
+        self.backup_error = backup_error
         self.backup_calls = 0
 
     def get_asset_eod(self, symbol):
@@ -25,6 +20,8 @@ class FakeClient:
 
     def get_asset_price_backup(self, symbol):
         self.backup_calls += 1
+        if self.backup_error:
+            raise self.backup_error
         return {
             "data": [
                 {
@@ -56,18 +53,18 @@ def stale_cache_row():
 
 
 def test_upstream_error_without_cache_does_not_fall_back_to_v1(db, monkeypatch):
-    fake = FakeClient(http_error(429))
+    fake = FakeClient(UpstreamUnavailable("/v2/eod -> 429"))
     monkeypatch.setattr(settings, "MOCK_DATA", False)
     monkeypatch.setattr(stock_service, "client", fake)
 
-    with pytest.raises(requests.HTTPError):
+    with pytest.raises(UpstreamUnavailable):
         stock_service.get_price("AAPL", db)
 
     assert fake.backup_calls == 0
 
 
 def test_unsupported_symbol_falls_back_to_v1(db, monkeypatch):
-    fake = FakeClient(http_error(422))
+    fake = FakeClient(ProviderRejected("/v2/eod -> 422"))
     monkeypatch.setattr(settings, "MOCK_DATA", False)
     monkeypatch.setattr(stock_service, "client", fake)
 
@@ -79,10 +76,35 @@ def test_unsupported_symbol_falls_back_to_v1(db, monkeypatch):
     assert result.stale is False
 
 
+def test_symbol_rejected_by_both_versions_is_not_found(db, monkeypatch):
+    fake = FakeClient(
+        ProviderRejected("/v2/eod -> 422"),
+        backup_error=ProviderRejected("/v1/eod -> 422"),
+    )
+    monkeypatch.setattr(settings, "MOCK_DATA", False)
+    monkeypatch.setattr(stock_service, "client", fake)
+
+    with pytest.raises(AssetNotFound):
+        stock_service.get_price("NOPE", db)
+
+    assert fake.backup_calls == 1
+
+
+def test_unknown_symbol_never_serves_stale_cache(db, monkeypatch):
+    db.add(stale_cache_row())
+    db.flush()
+    fake = FakeClient(AssetNotFound("/v2/eod -> 404"))
+    monkeypatch.setattr(settings, "MOCK_DATA", False)
+    monkeypatch.setattr(stock_service, "client", fake)
+
+    with pytest.raises(AssetNotFound):
+        stock_service.get_price("AAPL", db)
+
+
 def test_upstream_error_with_cache_serves_stale(db, monkeypatch):
     db.add(stale_cache_row())
     db.flush()
-    fake = FakeClient(http_error(500))
+    fake = FakeClient(UpstreamUnavailable("/v2/eod -> 500"))
     monkeypatch.setattr(settings, "MOCK_DATA", False)
     monkeypatch.setattr(stock_service, "client", fake)
 

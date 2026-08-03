@@ -1,6 +1,7 @@
 import requests
 
-from services.providers.upstream_error_handling import upstream_error_handling
+from core.errors import UpstreamTimeout, UpstreamUnavailable
+from services.providers.upstream_error_handling import raise_for_upstream
 
 
 class CoinCapClient:
@@ -9,29 +10,23 @@ class CoinCapClient:
         self.session = requests.Session()
         self.session.headers.update({"Authorization": f"Bearer {api_key}"})
 
-    def get_asset(self, asset_id: str) -> dict:
-        url = f"{self.baseurl}/v3/assets/{asset_id}"
-        r = self.session.get(url, timeout=2)
+    def _get(self, url: str, params: dict | None = None) -> dict:
+        try:
+            r = self.session.get(url, params=params, timeout=2)
+        except requests.Timeout as e:
+            raise UpstreamTimeout(f"CoinCap timeout: {url}") from e
+        except requests.ConnectionError as e:
+            raise UpstreamUnavailable(f"CoinCap unreachable: {url}") from e
 
-        upstream_error_handling(r)
+        raise_for_upstream(r)
 
         return r.json()
+
+    def get_asset(self, asset_id: str) -> dict:
+        return self._get(f"{self.baseurl}/v3/assets/{asset_id}")
 
     def get_assets(self, asset_ids: list[str]) -> dict:
-        assets = ",".join(asset_ids)
-        url = f"{self.baseurl}/v3/assets"
-        params = {"ids": assets}
-        r = self.session.get(url, params=params, timeout=2)
-
-        upstream_error_handling(r)
-
-        return r.json()
+        return self._get(f"{self.baseurl}/v3/assets", {"ids": ",".join(asset_ids)})
 
     def search_assets(self, query: str) -> dict:
-        url = f"{self.baseurl}/v3/assets"
-        params = {"search": query}
-        r = self.session.get(url, params=params, timeout=2)
-
-        upstream_error_handling(r)
-
-        return r.json()
+        return self._get(f"{self.baseurl}/v3/assets", {"search": query})

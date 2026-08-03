@@ -10,6 +10,13 @@ from sqlalchemy.exc import InterfaceError, OperationalError
 from starlette.responses import JSONResponse
 
 from core.config import settings
+from core.errors import (
+    AssetNotFound,
+    HoldingNotFound,
+    UnknownCurrency,
+    UpstreamError,
+    UpstreamTimeout,
+)
 from core.logging_config import setup_logging
 from core.rate_limit import limiter
 from db.database import SessionLocal
@@ -73,8 +80,53 @@ async def _database_unavailable_handler(request: Request, exc: Exception):
     )
 
 
+async def _asset_not_found_handler(request: Request, exc: Exception):
+    logger.warning("Asset not found on %s: %s", request.url.path, exc)
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": "Asset not found"},
+    )
+
+
+async def _holding_not_found_handler(request: Request, exc: Exception):
+    logger.warning("Holding not found on %s %s", request.url.path, exc)
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": "Holding not found"},
+    )
+
+
+async def _unknown_currency_handler(request: Request, exc: Exception):
+    logger.warning("Unknown currency on %s %s", request.url.path, exc)
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": "Currency not found"},
+    )
+
+
+async def _upstream_timeout_handler(request: Request, exc: Exception):
+    logger.error("Upstream timeout on %s: %s", request.url.path, exc)
+    return JSONResponse(
+        status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+        content={"detail": "External service timeout"},
+    )
+
+
+async def _upstream_error_handler(request: Request, exc: Exception):
+    logger.error("Upstream error on %s: %s", request.url.path, exc)
+    return JSONResponse(
+        status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+        content={"detail": "External service unavailable"},
+    )
+
+
+app.add_exception_handler(HoldingNotFound, _holding_not_found_handler)
+app.add_exception_handler(UnknownCurrency, _unknown_currency_handler)
 app.add_exception_handler(OperationalError, _database_unavailable_handler)
 app.add_exception_handler(InterfaceError, _database_unavailable_handler)
+app.add_exception_handler(AssetNotFound, _asset_not_found_handler)
+app.add_exception_handler(UpstreamTimeout, _upstream_timeout_handler)
+app.add_exception_handler(UpstreamError, _upstream_error_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,

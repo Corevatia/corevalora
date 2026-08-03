@@ -1,11 +1,10 @@
 import logging
 
-from fastapi import HTTPException
 from sqlalchemy import select
-from sqlalchemy.exc import InterfaceError, OperationalError
+from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session
-from starlette import status
 
+from core.errors import CoreValoraError, HoldingNotFound
 from db.models import Holding, User
 from models.portfolio import HoldingIn, HoldingOut
 from services import crypto_service, stock_service
@@ -31,13 +30,12 @@ def list_holdings(user: User, db: Session) -> list[HoldingOut]:
 def _safe_enrich_holding(holding: Holding, db: Session) -> HoldingOut:
     try:
         return _enrich_holding(holding, db)
-    except (OperationalError, InterfaceError):
-        raise
-    except Exception:
-        logger.exception(
-            "Failed to price holding id=%s key=%s; returning degraded entry",
+    except (CoreValoraError, IntegrityError, DataError) as e:
+        logger.warning(
+            "Failed to price holding id=%s key=%s; returning degraded entry: %s",
             holding.id,
             holding.key,
+            e,
         )
         return HoldingOut(
             id=holding.id,
@@ -95,10 +93,7 @@ def delete_holding(holding_id: int, user: User, db: Session) -> None:
     ).scalar_one_or_none()
 
     if holding is None:
-        logger.error(f"Holding not found while deleting id:{holding_id}")
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Holding not found"
-        )
+        raise HoldingNotFound(f"id {holding_id} for user {user.id}")
 
     db.delete(holding)
     db.commit()

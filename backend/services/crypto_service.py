@@ -1,11 +1,11 @@
 import logging
 from datetime import UTC, datetime
 
-import requests
 from sqlalchemy.orm import Session
 
 import models.crypto as crypto
 from core.config import settings
+from core.errors import AssetNotFound, UpstreamError
 from services.cache.price_cache import is_fresh, read_price, upsert_price
 from services.cache.search_cache import is_search_fresh, read_search, upsert_search
 from services.mocks.crypto_mock import get_crypto_mock, get_crypto_search_results_mock
@@ -49,19 +49,12 @@ def get_crypto_price(asset_id: str, db: Session) -> crypto.Crypto:
             date=datetime.now(UTC).isoformat(),
             stale=False,
         )
-    except requests.HTTPError as e:
-        if e.response is not None and e.response.status_code == 404:
-            raise
-        if cached:
-            logger.warning(
-                f"Upstream HTTP error for crypto {asset_id} serving stale cache: {e}"
-            )
-            return _cache_to_crypto(cached, stale=True)
+    except AssetNotFound:
         raise
-    except (requests.ConnectionError, requests.Timeout) as e:
+    except UpstreamError as e:
         if cached:
             logger.warning(
-                f"Upstream unreachable for crypto {asset_id} serving stale cache: {e}"
+                f"Upstream error for crypto {asset_id} serving stale cache: {e}"
             )
             return _cache_to_crypto(cached, stale=True)
         raise

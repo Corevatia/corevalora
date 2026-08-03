@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 import models.currency as currency
 import services.mocks.currency_rates_mock as currency_rates_dev
 from core.config import settings
+from core.errors import UnknownCurrency
 from db.models import CurrencyRate
 from services.providers.frankfurter_client import FrankfurterClient
 
@@ -81,11 +82,10 @@ def _load_or_fetch_eur_rates(db: Session) -> dict[str, float]:
 
 
 def convert_base(base_currency, rates):
-    try:
-        base_rate = rates[base_currency]
-    except KeyError:
-        raise KeyError(f"Unknown currency: {base_currency}")
+    if base_currency not in rates:
+        raise UnknownCurrency(f"Unknown currency: {base_currency}")
 
+    base_rate = rates[base_currency]
     new_rates = {}
     for c, rate in rates.items():
         new_rates[c] = rate / base_rate

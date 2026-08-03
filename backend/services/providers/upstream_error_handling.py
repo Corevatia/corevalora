@@ -1,20 +1,27 @@
 import logging
+from urllib.parse import urlsplit
 
 import requests
 
 from core.config import settings
+from core.errors import AssetNotFound, ProviderRejected, UpstreamUnavailable
 
 logger = logging.getLogger(__name__)
 
 
-def upstream_error_handling(r: requests.Response):
+def raise_for_upstream(r: requests.Response):
     if settings.UPSTREAM_DEBUG:
         logger.debug("Upstream status:%s, Upstream body:%s", r.status_code, r.text)
+    if r.ok:
+        return
 
-    try:
-        r.raise_for_status()
-    except requests.HTTPError as e:
-        logger.error("HTTP ERROR:%s, Status:%s", e, r.status_code)
-        if settings.UPSTREAM_DEBUG:
-            logger.error("Upstream error body:%s", r.text)
-        raise
+    where = f"{urlsplit(r.url).path} -> {r.status_code}"
+    logger.error("Upstream error: %s", where)
+    if settings.UPSTREAM_DEBUG:
+        logger.error("Upstream error body:%s", r.text)
+
+    if r.status_code == 404:
+        raise AssetNotFound(where)
+    if r.status_code == 422:
+        raise ProviderRejected(where)
+    raise UpstreamUnavailable(where)
