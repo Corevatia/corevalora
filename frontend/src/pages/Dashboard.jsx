@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Portfolio from "../components/portfolio/Portfolio";
 import CryptoSearch from "../components/crypto/CryptoSearch";
 import StockSearch from "../components/stock/StockSearch";
@@ -8,10 +7,11 @@ import {
   useDeleteHolding,
   useCurrencyRate,
 } from "../features/hooks";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 export function Dashboard() {
-  const [mode, setMode] = useState("stock");
-  const [currency, setCurrency] = useState("EUR");
+  const [mode, setMode] = useLocalStorage("cv:mode", "stock");
+  const [currency, setCurrency] = useLocalStorage("cv:currency", "EUR");
 
   const { holdings, loading, error, refetch } = useHoldings();
   const { remove } = useDeleteHolding();
