@@ -37,17 +37,18 @@ export default function PortfolioStats({
       <select
         value={currency}
         onChange={(e) => onCurrencyChange(e.target.value)}
-        style={{ padding: 8 }}
       >
         {currencies.map((c) => (
           <option key={c}>{c}</option>
         ))}
       </select>
-      <p>Invested: {formatPrice(totals.invested, currency)}</p>
-      <p>Portfolio Value: {formatPrice(totals.value, currency)}</p>
-      <p style={{ color: gainColor }}>
-        Gain/Loss: {formatPrice(gain, currency)}
-      </p>
+      <div className="flex flex-col gap-2 pt-5 text-lg">
+        <p>Invested: {formatPrice(totals.invested, currency)}</p>
+        <p>Portfolio Value: {formatPrice(totals.value, currency)}</p>
+        <p style={{ color: gainColor }}>
+          Gain/Loss: {formatPrice(gain, currency)}
+        </p>
+      </div>
     </div>
   );
 }

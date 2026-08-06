@@ -71,7 +71,7 @@ export default function StockSearch({ onSaved }) {
   }
 
   return (
-    <div style={{ padding: 24, fontFamily: "system-ui" }}>
+    <div className="flex flex-col gap-3 p-2">
       <h1>StockSearch</h1>
 
       <SearchBar

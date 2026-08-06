@@ -9,6 +9,8 @@ import {
 } from "../features/hooks";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
+const column = "min-w-0 flex-1 max-w-100 overflow-y-auto";
+
 export function Dashboard() {
   const [mode, setMode] = useLocalStorage("cv:mode", "stock");
   const [currency, setCurrency] = useLocalStorage("cv:currency", "EUR");
@@ -35,16 +37,16 @@ export function Dashboard() {
   const items = holdings ?? [];
 
   return (
-    <div style={{ display: "flex", height: "100vh", justifyContent: "center" }}>
-      <div
-        style={{ padding: 16, width: "400px", borderLeft: "1px solid #ddd" }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <h2 style={{ margin: 0 }}>Dashboard</h2>
+    <div className="flex h-screen justify-center divide-x divide-neutral-300 dark:divide-neutral-700">
+      <div className={`${column} p-1.5`}>
+        <div className="flex items-center gap-3 justify-content ">
+          <h2 className="text-3xl font-extrabold p-2">Dashboard</h2>
+        </div>
+        <div className="pt-9 flex justify-center">
           <select
             value={mode}
             onChange={(e) => setMode(e.target.value)}
-            style={{ padding: 8 }}
+            className="p-1.5 px-7 text-lg"
           >
             <option value="crypto">Crypto</option>
             <option value="stock">Stocks</option>
@@ -56,15 +58,9 @@ export function Dashboard() {
           <StockSearch onSaved={refetch} />
         )}
       </div>
-      <div
-        style={{
-          width: "400px",
-          overflow: "auto",
-          borderLeft: "1px solid #ddd",
-        }}
-      >
-        {loading && <p>Loading...</p>}
-        {error && <p>Could not load holdings</p>}
+      <div className={column}>
+        {loading && <p className="p-4">Loading...</p>}
+        {error && <p className="p-4">Could not load holdings</p>}
         <Portfolio
           holdings={items}
           rates={rates}
@@ -72,14 +68,7 @@ export function Dashboard() {
           onDelete={handleDelete}
         />
       </div>
-      <div
-        style={{
-          width: "400px",
-          overflow: "auto",
-          borderRight: "1px solid #ddd",
-          borderLeft: "1px solid #ddd",
-        }}
-      >
+      <div className={column}>
         <PortfolioStats
           holdings={items}
           rates={rates}

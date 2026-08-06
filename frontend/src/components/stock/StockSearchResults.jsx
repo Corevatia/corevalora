@@ -10,7 +10,12 @@ function ResultRow({ result, onSelect }) {
         exchange={result.exchange}
         mic={result.mic}
       />
-      <button onClick={() => onSelect(result.key)}>Add Holding</button>
+      <button
+        className="bg-mist-700 hover:bg-mist-900 text-white font-bold py-2 px-4 rounded-2xl"
+        onClick={() => onSelect(result.key)}
+      >
+        Add Holding
+      </button>
     </div>
   );
 }
@@ -42,7 +47,14 @@ export default function StockSearchResults({
           <ResultRow key={r.key} result={r} onSelect={onSelect} />
         ))}
       {!error && !extendederror && !extendedSearch && searchdata && (
-        <button onClick={onExtend}>Extend Search</button>
+        <div className="pt-3 text-center">
+          <button
+            className="bg-mist-400 hover:bg-mist-600 dark:bg-mist-900 hover:dark:bg-mist-950 text-white font-semibold py-2 px-2 rounded-xl"
+            onClick={onExtend}
+          >
+            Extend Search
+          </button>
+        </div>
       )}
     </div>
   );

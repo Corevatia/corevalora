@@ -1,3 +1,21 @@
+@import "tailwindcss";
+
+@layer base {
+  select {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--input-border);
+    background-color: var(--input-bg);
+    color: inherit;
+  }
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    text-align: center;
+  }
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

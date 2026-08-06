@@ -47,7 +47,7 @@ export default function CryptoSearch({ onSaved }) {
   }
 
   return (
-    <div style={{ padding: 24, fontFamily: "system-ui" }}>
+    <div className="flex flex-col gap-3 p-2">
       <h1>CryptoSearch</h1>
 
       <SearchBar

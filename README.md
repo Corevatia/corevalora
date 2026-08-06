@@ -4,9 +4,9 @@
 
 Track crypto and stock holdings with live prices and multi-currency valuation — a full-stack app built with React, FastAPI and PostgreSQL.
 
---- 
+---
 
-## Screenshot
+## Screenshot Version 1.0.0
 
 ![Dashboard](.github/CoreValora_Demo.png)
 
@@ -62,7 +62,6 @@ docker compose up       # add --build after changing code or dependencies
 > Working on the code? Backend and frontend also run natively with hot-reload, and a
 > `Makefile` wraps the everyday commands — see **[DEVELOPMENT.md](DEVELOPMENT.md)**.
 
-
 ---
 
 ## Architecture
@@ -94,7 +93,6 @@ portfolios and the market-data cache all live in PostgreSQL.
    PostgreSQL ── users · portfolios · cached prices, searches & FX rates
 ```
 
-
 **Design highlights:**
 
 - **TTL caching** (`services/cache/`) — each upstream response is cached for a
@@ -123,7 +121,6 @@ portfolios and the market-data cache all live in PostgreSQL.
 The interactive API reference (FastAPI auto-generated) is available at
 [`/docs`](http://localhost:8000/docs) when the backend is running.
 
-
 ## Known Limitations
 
 This is a v1 focused on getting the core flow right. Gaps I'm aware of and plan
@@ -133,7 +130,7 @@ to address:
   aren't always sorted sensibly — a company often shows up first on a larger
   (frequently US) exchange rather than its home exchange. Search ordering needs
   work.
-- **No selling or partial position changes:** buying *more* of an asset works —
+- **No selling or partial position changes:** buying _more_ of an asset works —
   adding to an existing holding recomputes the average price and sums the
   quantity correctly. But reducing or selling part of a position isn't supported
   yet; to do that you'd delete the holding and re-create it.
