@@ -1,4 +1,5 @@
 import os
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -98,9 +99,12 @@ def holding(db, user):
         user_id=user.id,
         asset="Bitcoin",
         symbol="BTC",
-        amount=2.5,
-        avg_price=40000,
         kind="crypto",
+        transactions=[
+            models.Transaction(
+                side="buy", amount=2.5, price=40000, traded_on=date(2026, 1, 15)
+            )
+        ],
     )
     db.add(h)
     db.flush()
@@ -114,9 +118,12 @@ def other_holding(db, other_user):
         user_id=other_user.id,
         asset="Ethereum",
         symbol="ETH",
-        amount=5,
-        avg_price=2000,
         kind="crypto",
+        transactions=[
+            models.Transaction(
+                side="buy", amount=5, price=2000, traded_on=date(2026, 1, 15)
+            )
+        ],
     )
     db.add(h)
     db.flush()

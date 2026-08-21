@@ -26,5 +26,13 @@ class HoldingNotFound(CoreValoraError):
     """No holding with that id belongs to the current user."""
 
 
+class TransactionNotFound(CoreValoraError):
+    """No transaction with that id belongs to the current user."""
+
+
+class InsufficientHoldingAmount(CoreValoraError):
+    """The transaction would leave the position holding less than nothing."""
+
+
 class UnknownCurrency(CoreValoraError):
     """The requested currency is missing from the exchange rate data."""

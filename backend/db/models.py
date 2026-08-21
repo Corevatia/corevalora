@@ -1,8 +1,17 @@
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, Float, ForeignKey, String, UniqueConstraint, func
+from sqlalchemy import (
+    CheckConstraint,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    String,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.database import Base
 
@@ -51,14 +60,43 @@ class Holding(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     asset: Mapped[str] = mapped_column(String(255))
     symbol: Mapped[str] = mapped_column(String(10))
-    amount: Mapped[float] = mapped_column(Float)
-    avg_price: Mapped[float] = mapped_column(Float)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
     kind: Mapped[str] = mapped_column(String(10))
 
+    transactions: Mapped[list["Transaction"]] = relationship(
+        back_populates="holding",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        order_by="Transaction.traded_on, Transaction.id",
+    )
+
     __table_args__ = (UniqueConstraint("user_id", "key", "kind"),)
+
+
+class Transaction(Base):
+    __tablename__ = "transactions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    holding_id: Mapped[int] = mapped_column(
+        ForeignKey("holdings.id", ondelete="CASCADE"), index=True
+    )
+    side: Mapped[str] = mapped_column(String(4))
+    amount: Mapped[float] = mapped_column(Float)
+    price: Mapped[float] = mapped_column(Float)
+    traded_on: Mapped[datetime] = mapped_column(Date, index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    holding: Mapped[Holding] = relationship(back_populates="transactions")
+
+    __table_args__ = (
+        CheckConstraint("side IN ('buy', 'sell')", name="ck_transactions_side"),
+        CheckConstraint("amount > 0", name="ck_transactions_amount_positive"),
+        CheckConstraint("price > 0", name="ck_transactions_price_non_negative"),
+    )
 
 
 class AssetPriceCache(Base):

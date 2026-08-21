@@ -13,6 +13,8 @@ from core.config import settings
 from core.errors import (
     AssetNotFound,
     HoldingNotFound,
+    InsufficientHoldingAmount,
+    TransactionNotFound,
     UnknownCurrency,
     UpstreamError,
     UpstreamTimeout,
@@ -104,6 +106,22 @@ async def _unknown_currency_handler(request: Request, exc: Exception):
     )
 
 
+async def _transaction_not_found_handler(request: Request, exc: Exception):
+    logger.warning("Transaction not found on %s %s", request.url.path, exc)
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": "Transaction not found"},
+    )
+
+
+async def _insufficient_amount_handler(request: Request, exc: Exception):
+    logger.warning("Uncovered sell on %s %s", request.url.path, exc)
+    return JSONResponse(
+        status_code=status.HTTP_409_CONFLICT,
+        content={"detail": "Not enough of this asset held"},
+    )
+
+
 async def _upstream_timeout_handler(request: Request, exc: Exception):
     logger.error("Upstream timeout on %s: %s", request.url.path, exc)
     return JSONResponse(
@@ -127,6 +145,8 @@ app.add_exception_handler(InterfaceError, _database_unavailable_handler)
 app.add_exception_handler(AssetNotFound, _asset_not_found_handler)
 app.add_exception_handler(UpstreamTimeout, _upstream_timeout_handler)
 app.add_exception_handler(UpstreamError, _upstream_error_handler)
+app.add_exception_handler(InsufficientHoldingAmount, _insufficient_amount_handler)
+app.add_exception_handler(TransactionNotFound, _transaction_not_found_handler)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,

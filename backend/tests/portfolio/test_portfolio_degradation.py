@@ -24,8 +24,8 @@ def test_upstream_error_degrades_the_holding(db, user, holding, monkeypatch):
     assert result[0].id == holding.id
     assert result[0].price is None
     assert result[0].stale is True
-    assert result[0].amount == holding.amount
-    assert result[0].avg_price == holding.avg_price
+    assert result[0].amount == 2.5
+    assert result[0].avg_price == 40000
 
 
 def test_delisted_asset_degrades_the_holding(db, user, holding, monkeypatch):

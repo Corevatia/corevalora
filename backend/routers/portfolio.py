@@ -6,7 +6,7 @@ from core.auth_deps import get_current_user
 from core.rate_limit import limiter
 from db.database import get_db
 from db.models import User
-from models.portfolio import HoldingIn, HoldingOut
+from models.portfolio import HoldingIn, HoldingOut, TransactionIn, TransactionOut
 from services import portfolio_service
 
 router = APIRouter(prefix="/portfolio", tags=["portfolio"])
@@ -22,6 +22,18 @@ def list_holdings(
     return portfolio_service.list_holdings(current_user, db)
 
 
+@router.get("/holdings/{holding_id}/transactions", response_model=list[TransactionOut])
+@limiter.limit("120/minute")
+def list_transactions(
+    request: Request,
+    holding_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return portfolio_service.list_transactions(holding_id, current_user, db)
+
+
+# Temporary so frontend keeps working
 @router.post(
     "/holdings", response_model=HoldingOut, status_code=status.HTTP_201_CREATED
 )
@@ -33,6 +45,30 @@ def add_holding(
     db: Session = Depends(get_db),
 ):
     return portfolio_service.add_holding(data, current_user, db)
+
+
+@router.post(
+    "/transactions", response_model=HoldingOut, status_code=status.HTTP_201_CREATED
+)
+@limiter.limit("20/minute")
+def add_transaction(
+    request: Request,
+    data: TransactionIn,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return portfolio_service.add_transaction(data, current_user, db)
+
+
+@router.delete("/transactions/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit("20/minute")
+def delete_transaction(
+    request: Request,
+    transaction_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return portfolio_service.delete_transaction(transaction_id, current_user, db)
 
 
 @router.delete("/holdings/{holding_id}", status_code=status.HTTP_204_NO_CONTENT)
