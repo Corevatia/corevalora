@@ -61,14 +61,14 @@ export function fetchHoldings(options = {}) {
   return request(`/portfolio/holdings`, options);
 }
 
-export function saveHolding(
-  { key, asset, symbol, kind, amount, buy_price },
+export function saveTransaction(
+  { asset, key, symbol, kind, side, amount, price, traded_on },
   options = {},
 ) {
-  return request(`/portfolio/holdings`, {
+  return request(`/portfolio/transactions`, {
     ...options,
     method: "POST",
-    json: { key, asset, symbol, kind, amount, buy_price },
+    json: { asset, key, symbol, kind, side, amount, price, traded_on },
   });
 }
 

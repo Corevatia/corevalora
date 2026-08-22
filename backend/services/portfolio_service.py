@@ -1,6 +1,5 @@
 import logging
 from collections.abc import Iterable
-from datetime import date
 from math import inf
 
 from sqlalchemy import select
@@ -14,7 +13,7 @@ from core.errors import (
     TransactionNotFound,
 )
 from db.models import Holding, Transaction, User
-from models.portfolio import HoldingIn, HoldingOut, TransactionIn, TransactionOut
+from models.portfolio import HoldingOut, TransactionIn, TransactionOut
 from services import crypto_service, stock_service
 
 logger = logging.getLogger(__name__)
@@ -138,24 +137,6 @@ def add_transaction(data: TransactionIn, user: User, db: Session) -> HoldingOut:
 
     amount, avg_price = aggregate_transactions(holding.transactions)
     return _enrich_holding(holding, db, amount, avg_price)
-
-
-def add_holding(data: HoldingIn, user: User, db: Session) -> HoldingOut:
-    # Temporary so frontend keeps working
-    return add_transaction(
-        TransactionIn(
-            asset=data.asset,
-            key=data.key,
-            symbol=data.symbol,
-            kind=data.kind,
-            side="buy",
-            amount=data.amount,
-            price=data.buy_price,
-            traded_on=date.today(),
-        ),
-        user,
-        db,
-    )
 
 
 def _find_position(data: TransactionIn, user: User, db: Session) -> Holding | None:

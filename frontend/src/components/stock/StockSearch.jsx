@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import {
-  useSaveHolding,
+  useSaveTransaction,
   useStockSearch,
   useStockSearchBackup,
   useStockprice,
@@ -42,9 +42,9 @@ export default function StockSearch({ onSaved }) {
     error: stockDataError,
   } = useStockprice(selectedKey);
 
-  const { save, error: saveError } = useSaveHolding();
+  const { save, error: saveError } = useSaveTransaction();
 
-  async function handleConfirm({ amount, buyPrice }) {
+  async function handleConfirm({ side, amount, price, tradedOn }) {
     if (!stockdata?.symbol) return;
 
     try {
@@ -53,8 +53,10 @@ export default function StockSearch({ onSaved }) {
         key: stockdata.key,
         symbol: stockdata.symbol,
         kind: "stock",
+        side,
         amount,
-        buy_price: buyPrice,
+        price,
+        traded_on: tradedOn,
       });
       setSelectedKey(null);
       onSaved?.();
@@ -101,7 +103,13 @@ export default function StockSearch({ onSaved }) {
         />
       )}
 
-      {saveError && <p>Could not save holding: {saveError.message}</p>}
+      {saveError && (
+        <p>
+          {saveError.status === 409
+            ? "You do not hold enough of this asset"
+            : `Could not save holding: ${saveError.message}`}
+        </p>
+      )}
     </div>
   );
 }

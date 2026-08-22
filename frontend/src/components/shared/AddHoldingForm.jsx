@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { formatDateTime, formatPrice } from "../../lib/format";
 
+function today() {
+  return new Date().toISOString().split("T")[0];
+}
+
 export default function AddHoldingForm({ data, loading, error, onConfirm }) {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Sorry, something went wrong</p>;
@@ -11,15 +15,20 @@ export default function AddHoldingForm({ data, loading, error, onConfirm }) {
 }
 
 function AddHoldingFormReady({ data, onConfirm }) {
+  const [side, setSide] = useState("buy");
   const [amount, setAmount] = useState("");
-  const [buyPrice, setBuyPrice] = useState(String(data.price));
+  const [price, setPrice] = useState(String(data.price));
+  const [tradedOn, setTradedOn] = useState(today());
+
+  const inputClass = "border border-gray-300 rounded-md px-2 py-1 text-sm";
 
   function handleConfirm() {
     const amt = Number(amount);
-    const bp = Number(buyPrice);
+    const p = Number(price);
     if (!Number.isFinite(amt) || amt <= 0) return;
-    if (!Number.isFinite(bp) || bp <= 0) return;
-    onConfirm({ amount: amt, buyPrice: bp });
+    if (!Number.isFinite(p) || p <= 0) return;
+    if (!tradedOn) return;
+    onConfirm({ side, amount: amt, price: p, tradedOn });
   }
 
   return (
@@ -31,14 +40,27 @@ function AddHoldingFormReady({ data, onConfirm }) {
       {data.exchange && <p>Exchange: {data.exchange}</p>}
       <div className="pt-3">
         <label className="font-semibold">
-          Buy price:{" "}
+          Type:{" "}
+          <select
+            value={side}
+            onChange={(e) => setSide(e.target.value)}
+            className={inputClass}
+          >
+            <option value="buy">Buy</option>
+            <option value="sell">Sell</option>
+          </select>
+        </label>
+      </div>
+      <div className="pt-1">
+        <label className="font-semibold">
+          Price:{" "}
           <input
             type="number"
             min="0"
             step="any"
-            value={buyPrice}
-            onChange={(e) => setBuyPrice(e.target.value)}
-            className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className={inputClass}
           />{" "}
           {data.currency}
         </label>
@@ -54,7 +76,20 @@ function AddHoldingFormReady({ data, onConfirm }) {
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder="Amount (e.g. 0.5)"
-            className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+            className={inputClass}
+          />
+        </label>
+      </div>
+      <div className="pt-1">
+        <label className="font-semibold">
+          Date:{" "}
+          <input
+            type="date"
+            required
+            max={today()}
+            value={tradedOn}
+            onChange={(e) => setTradedOn(e.target.value)}
+            className={inputClass}
           />
         </label>
       </div>

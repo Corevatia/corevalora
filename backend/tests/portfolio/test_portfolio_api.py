@@ -37,19 +37,7 @@ def test_delete_other_user_holding_is_not_found(
 
 def test_portfolio_without_session_is_unauthorized(client):
     get = client.get("/portfolio/holdings")
-    post = client.post(
-        "/portfolio/holdings",
-        json={
-            "asset": "Bitcoin",
-            "key": "bitcoin",
-            "symbol": "BTC",
-            "amount": 1.0,
-            "buy_price": 100,
-            "kind": "crypto",
-        },
-    )
     delete = client.delete("/portfolio/holdings/0")
 
     assert get.status_code == 401
-    assert post.status_code == 401
     assert delete.status_code == 401

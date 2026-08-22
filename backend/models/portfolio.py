@@ -4,16 +4,6 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
-# Temporary so frontend keeps working
-class HoldingIn(BaseModel):
-    asset: str
-    key: str
-    symbol: str
-    amount: float = Field(gt=0)
-    buy_price: float = Field(ge=0)
-    kind: str
-
-
 class TransactionIn(BaseModel):
     asset: str
     key: str

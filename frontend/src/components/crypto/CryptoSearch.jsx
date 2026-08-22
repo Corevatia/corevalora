@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   useCryptoprice,
   useCryptoSearch,
-  useSaveHolding,
+  useSaveTransaction,
 } from "../../features/hooks.js";
 import { SearchBar } from "../shared/SearchBar.jsx";
 import AddHoldingForm from "../shared/AddHoldingForm.jsx";
@@ -19,9 +19,9 @@ export default function CryptoSearch({ onSaved }) {
     error: searchError,
   } = useCryptoSearch(query);
   const { data, loading, error } = useCryptoprice(selectedKey);
-  const { save, error: saveError } = useSaveHolding();
+  const { save, error: saveError } = useSaveTransaction();
 
-  async function handleConfirm({ amount, buyPrice }) {
+  async function handleConfirm({ side, amount, price, tradedOn }) {
     if (!data?.symbol) return;
     try {
       await save({
@@ -29,8 +29,10 @@ export default function CryptoSearch({ onSaved }) {
         key: data.key,
         symbol: data.symbol,
         kind: "crypto",
+        side,
         amount,
-        buy_price: buyPrice,
+        price,
+        traded_on: tradedOn,
       });
       setSelectedKey(null);
       setQuery("");
@@ -72,7 +74,13 @@ export default function CryptoSearch({ onSaved }) {
         />
       )}
 
-      {saveError && <p>Could not save holding: {saveError.message}</p>}
+      {saveError && (
+        <p>
+          {saveError.status === 409
+            ? "You do not hold enough of this asset"
+            : `Could not save holding: ${saveError.message}`}
+        </p>
+      )}
     </div>
   );
 }

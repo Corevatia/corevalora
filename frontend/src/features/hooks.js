@@ -10,9 +10,9 @@ import {
   registerUser,
   logoutUser,
   fetchHoldings,
-  saveHolding,
   deleteHolding,
   fetchCryptoSearch,
+  saveTransaction,
 } from "./api";
 
 function useFetch(fetchFn, param, enabled = true) {
@@ -140,8 +140,8 @@ export function useHoldings() {
   return { holdings: data, loading, error, refetch };
 }
 
-export function useSaveHolding() {
-  const { mutate, loading, error } = useMutation(saveHolding);
+export function useSaveTransaction() {
+  const { mutate, loading, error } = useMutation(saveTransaction);
   return { save: mutate, loading, error };
 }
 
