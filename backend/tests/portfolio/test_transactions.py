@@ -42,7 +42,7 @@ def all_transactions(db):
 
 
 def test_buy_creates_position_and_transaction(auth_client, db, user, monkeypatch):
-    monkeypatch.setattr(crypto_service, "get_crypto_price", fake_get_crypto_price)
+    monkeypatch.setattr(crypto_service, "get_price", fake_get_crypto_price)
 
     resp = auth_client.post("/portfolio/transactions", json=payload())
 
@@ -60,7 +60,7 @@ def test_buy_creates_position_and_transaction(auth_client, db, user, monkeypatch
 
 
 def test_second_buy_reuses_the_position(auth_client, db, holding, monkeypatch):
-    monkeypatch.setattr(crypto_service, "get_crypto_price", fake_get_crypto_price)
+    monkeypatch.setattr(crypto_service, "get_price", fake_get_crypto_price)
 
     resp = auth_client.post(
         "/portfolio/transactions", json=btc(amount=2.5, price=60000)
@@ -86,7 +86,7 @@ def test_future_trade_date_is_rejected(auth_client, db):
 
 
 def test_today_is_accepted(auth_client, monkeypatch):
-    monkeypatch.setattr(crypto_service, "get_crypto_price", fake_get_crypto_price)
+    monkeypatch.setattr(crypto_service, "get_price", fake_get_crypto_price)
 
     resp = auth_client.post(
         "/portfolio/transactions", json=payload(traded_on=date.today().isoformat())
@@ -98,7 +98,7 @@ def test_today_is_accepted(auth_client, monkeypatch):
 def test_sell_shrinks_the_amount_but_keeps_the_avg_price(
     auth_client, db, holding, monkeypatch
 ):
-    monkeypatch.setattr(crypto_service, "get_crypto_price", fake_get_crypto_price)
+    monkeypatch.setattr(crypto_service, "get_price", fake_get_crypto_price)
 
     resp = auth_client.post("/portfolio/transactions", json=btc(side="sell", amount=1))
 
@@ -125,7 +125,7 @@ def test_selling_an_asset_that_is_not_held_is_a_conflict(auth_client, db):
 def test_backdated_sell_must_be_covered_on_its_own_date(
     auth_client, db, holding, monkeypatch
 ):
-    monkeypatch.setattr(crypto_service, "get_crypto_price", fake_get_crypto_price)
+    monkeypatch.setattr(crypto_service, "get_price", fake_get_crypto_price)
     auth_client.post(
         "/portfolio/transactions",
         json=btc(amount=5, price=60000, traded_on="2026-03-01"),
@@ -144,7 +144,7 @@ def test_backdated_sell_must_be_covered_on_its_own_date(
 def test_position_sold_off_keeps_its_history_but_leaves_the_portfolio(
     auth_client, db, holding, monkeypatch
 ):
-    monkeypatch.setattr(crypto_service, "get_crypto_price", fake_get_crypto_price)
+    monkeypatch.setattr(crypto_service, "get_price", fake_get_crypto_price)
 
     sold = auth_client.post(
         "/portfolio/transactions", json=btc(side="sell", amount=2.5)
@@ -159,7 +159,7 @@ def test_position_sold_off_keeps_its_history_but_leaves_the_portfolio(
 
 
 def test_history_is_newest_first(auth_client, holding, monkeypatch):
-    monkeypatch.setattr(crypto_service, "get_crypto_price", fake_get_crypto_price)
+    monkeypatch.setattr(crypto_service, "get_price", fake_get_crypto_price)
     auth_client.post(
         "/portfolio/transactions",
         json=btc(amount=1, price=50000, traded_on="2026-03-01"),
@@ -182,7 +182,7 @@ def test_history_of_another_users_holding_is_not_found(auth_client, other_holdin
 def test_deleting_a_transaction_updates_the_position(
     auth_client, db, holding, monkeypatch
 ):
-    monkeypatch.setattr(crypto_service, "get_crypto_price", fake_get_crypto_price)
+    monkeypatch.setattr(crypto_service, "get_price", fake_get_crypto_price)
     added = auth_client.post(
         "/portfolio/transactions", json=btc(amount=2.5, price=60000)
     )
@@ -201,7 +201,7 @@ def test_deleting_a_transaction_updates_the_position(
 def test_deleting_a_buy_that_covers_a_sell_is_a_conflict(
     auth_client, db, holding, monkeypatch
 ):
-    monkeypatch.setattr(crypto_service, "get_crypto_price", fake_get_crypto_price)
+    monkeypatch.setattr(crypto_service, "get_price", fake_get_crypto_price)
     auth_client.post("/portfolio/transactions", json=btc(side="sell", amount=2))
     buy_id = holding.transactions[0].id
 

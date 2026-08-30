@@ -17,7 +17,7 @@ def fake_get_crypto_price(asset_id, db):
 def test_holdings_returns_only_own_holdings(
     auth_client, holding, other_holding, monkeypatch
 ):
-    monkeypatch.setattr(crypto_service, "get_crypto_price", fake_get_crypto_price)
+    monkeypatch.setattr(crypto_service, "get_price", fake_get_crypto_price)
 
     resp = auth_client.get("/portfolio/holdings")
 

@@ -25,6 +25,7 @@ from db.database import SessionLocal
 from routers.auth import router as auth_router
 from routers.crypto import router as crypto_router
 from routers.currency import router as currency_router
+from routers.metal import router as metal_router
 from routers.portfolio import router as portfolio_router
 from routers.stock import router as stock_router
 from services.auth.sessions import delete_expired_sessions
@@ -155,6 +156,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(metal_router)
 app.include_router(crypto_router)
 app.include_router(stock_router)
 app.include_router(currency_router)

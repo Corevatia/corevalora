@@ -23,7 +23,7 @@ def test_service_error_maps_to_status(auth_client, monkeypatch, error, expected_
     def raise_error(asset_id, db):
         raise error
 
-    monkeypatch.setattr(crypto_service, "get_crypto_price", raise_error)
+    monkeypatch.setattr(crypto_service, "get_price", raise_error)
 
     resp = auth_client.get("/crypto/price/bitcoin")
 

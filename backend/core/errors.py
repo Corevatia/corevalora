@@ -36,3 +36,7 @@ class InsufficientHoldingAmount(CoreValoraError):
 
 class UnknownCurrency(CoreValoraError):
     """The requested currency is missing from the exchange rate data."""
+
+
+class UnsupportedAssetKind(CoreValoraError):
+    """The requested asset kind is not supported."""

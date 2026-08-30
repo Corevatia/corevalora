@@ -19,7 +19,7 @@ def get_price(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return service.get_crypto_price(asset_id, db)
+    return service.get_price(asset_id, db)
 
 
 @router.get("/search/{query}", response_model=list[SearchResult])

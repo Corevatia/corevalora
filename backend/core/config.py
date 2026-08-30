@@ -6,6 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     MARKETSTACK_API_KEY: str
     COINCAP_API_KEY: str
+    METALS_DEV_API_KEY: str
     MOCK_DATA: bool = False
     UPSTREAM_DEBUG: bool = False
     LOGGING_LEVEL: str = "INFO"
@@ -19,6 +20,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:5173"
     CRYPTO_CACHE_TTL_SECONDS: int | None = 120
     STOCK_CACHE_TTL_HOURS: int | None = 24
+    METALS_CACHE_TTL_HOURS: int | None = 1
     SEARCH_CACHE_TTL_HOURS: int | None = 48
     MAINTENANCE_LOOP_HOURS: int | None = 6
 

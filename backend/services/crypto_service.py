@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 client = CoinCapClient(api_key=settings.COINCAP_API_KEY)
 
 
-def get_crypto_price(asset_id: str, db: Session) -> crypto.Crypto:
+def get_price(asset_id: str, db: Session) -> crypto.Crypto:
     if settings.MOCK_DATA:
         return get_crypto_mock()
 

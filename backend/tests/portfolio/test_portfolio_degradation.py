@@ -14,7 +14,7 @@ def raise_on_price(error):
 def test_upstream_error_degrades_the_holding(db, user, holding, monkeypatch):
     monkeypatch.setattr(
         crypto_service,
-        "get_crypto_price",
+        "get_price",
         raise_on_price(UpstreamUnavailable("/v3/assets -> 503")),
     )
 
@@ -30,7 +30,7 @@ def test_upstream_error_degrades_the_holding(db, user, holding, monkeypatch):
 
 def test_delisted_asset_degrades_the_holding(db, user, holding, monkeypatch):
     monkeypatch.setattr(
-        crypto_service, "get_crypto_price", raise_on_price(AssetNotFound("bitcoin"))
+        crypto_service, "get_price", raise_on_price(AssetNotFound("bitcoin"))
     )
 
     result = portfolio_service.list_holdings(user, db)
@@ -42,7 +42,7 @@ def test_delisted_asset_degrades_the_holding(db, user, holding, monkeypatch):
 
 def test_bug_while_pricing_is_not_swallowed(db, user, holding, monkeypatch):
     monkeypatch.setattr(
-        crypto_service, "get_crypto_price", raise_on_price(KeyError("priceUsd"))
+        crypto_service, "get_price", raise_on_price(KeyError("priceUsd"))
     )
 
     with pytest.raises(KeyError):

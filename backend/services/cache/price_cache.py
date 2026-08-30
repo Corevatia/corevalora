@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 CACHE_TTL_SECONDS = {
     "crypto": settings.CRYPTO_CACHE_TTL_SECONDS,
     "stock": 3600 * settings.STOCK_CACHE_TTL_HOURS,
+    "metal": 3600 * settings.METALS_CACHE_TTL_HOURS,
 }
 
 

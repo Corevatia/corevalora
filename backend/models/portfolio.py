@@ -8,7 +8,7 @@ class TransactionIn(BaseModel):
     asset: str
     key: str
     symbol: str
-    kind: str
+    kind: Literal["stock", "crypto", "metal"]
     side: Literal["buy", "sell"]
     amount: float = Field(gt=0)
     price: float = Field(ge=0)
