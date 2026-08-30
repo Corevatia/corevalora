@@ -44,8 +44,10 @@ cp .env.example .env    # PowerShell: Copy-Item .env.example .env
 ```
 
 At minimum set `POSTGRES_PASSWORD` and two free API keys:
-[MarketStack](https://marketstack.com) (stocks) and
+[MarketStack](https://marketstack.com) (stocks),
+[Metals.Dev](https://metals.dev) (metals) and
 [CoinCap](https://pro.coincap.io) (crypto). The database connection URL is built
+
 automatically from the `POSTGRES_*` values, so there's no password to keep in sync.
 
 ### 2. Start it

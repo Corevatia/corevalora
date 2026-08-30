@@ -11,7 +11,6 @@ from core.errors import (
     HoldingNotFound,
     InsufficientHoldingAmount,
     TransactionNotFound,
-    UnsupportedAssetKind,
 )
 from db.models import Holding, Transaction, User
 from models.portfolio import HoldingOut, TransactionIn, TransactionOut
@@ -214,11 +213,9 @@ def _enrich_holding(
     elif holding.kind == "stock":
         priced = stock_service.get_price(holding.key, db)
         exchange = priced.exchange
-    elif holding.kind == "metal":
+    else:
         priced = metal_service.get_price(holding.key, db)
         exchange = None
-    else:
-        raise UnsupportedAssetKind(f"holding id {holding.id}: kind {holding.kind!r}")
 
     return HoldingOut(
         id=holding.id,

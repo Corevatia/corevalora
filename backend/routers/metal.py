@@ -26,7 +26,6 @@ def get_price(
 @limiter.limit("30/minute")
 def get_supported_metals(
     request: Request,
-    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     return service.get_supported_metals()

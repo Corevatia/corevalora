@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:5173"
     CRYPTO_CACHE_TTL_SECONDS: int | None = 120
     STOCK_CACHE_TTL_HOURS: int | None = 24
-    METALS_CACHE_TTL_HOURS: int | None = 1
+    METAL_CACHE_TTL_HOURS: int | None = 1
     SEARCH_CACHE_TTL_HOURS: int | None = 48
     MAINTENANCE_LOOP_HOURS: int | None = 6
 

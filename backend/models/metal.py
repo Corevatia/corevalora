@@ -8,7 +8,7 @@ class Metal(BaseModel):
     price: float
     currency: str
     date: str
-    stale: bool
+    stale: bool = False
 
 
 class SupportedMetal(BaseModel):

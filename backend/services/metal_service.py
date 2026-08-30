@@ -1,5 +1,6 @@
 import logging
 
+from sqlalchemy.exc import DataError, IntegrityError
 from sqlalchemy.orm import Session
 
 from core.config import settings
@@ -35,6 +36,8 @@ def get_supported_metals() -> list[SupportedMetal]:
 
 
 def get_price(key: str, db: Session) -> metal.Metal:
+    requested = get_metal(key)
+
     if settings.MOCK_DATA:
         return get_metal_mock()
 
@@ -45,33 +48,33 @@ def get_price(key: str, db: Session) -> metal.Metal:
 
     try:
         data = client.get_latest_metals()
+        currency = data["currency"]
+        price_date = data["timestamps"]["metal"][:10]
 
-        for m in SUPPORTED_METALS:
+        for metal_key, supported in SUPPORTED_METALS.items():
             upsert_price(
                 db,
                 kind="metal",
-                key=get_metal(m).key,
-                symbol=get_metal(m).symbol,
-                asset_name=get_metal(m).name,
-                price=float(data["metals"][m]),
-                currency=data["currency"],
-                price_date=data["timestamps"]["metal"][:10],
+                key=metal_key,
+                symbol=supported.symbol,
+                asset_name=supported.name,
+                price=float(data["metals"][metal_key]),
+                currency=currency,
+                price_date=price_date,
             )
 
         return metal.Metal(
             key=key,
-            symbol=get_metal(key).symbol,
-            name=get_metal(key).name,
+            symbol=requested.symbol,
+            name=requested.name,
             price=float(data["metals"][key]),
-            currency=data["currency"],
-            date=data["timestamps"]["metal"][:10],
+            currency=currency,
+            date=price_date,
             stale=False,
         )
-    except AssetNotFound:
-        raise
-    except UpstreamError as e:
+    except (UpstreamError, IntegrityError, DataError) as e:
         if cached:
-            logger.warning(f"Upstream error for metal {key} serving stale cache: {e}")
+            logger.warning(f"Could not refresh metal {key} serving stale: {e}")
             return _cache_to_metal(cached, stale=True)
         raise
 

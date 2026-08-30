@@ -1,7 +1,30 @@
+import logging
+
 import requests
 
-from core.errors import UpstreamTimeout, UpstreamUnavailable
+from core.errors import (
+    AssetNotFound,
+    ProviderRejected,
+    UpstreamTimeout,
+    UpstreamUnavailable,
+)
 from services.providers.upstream_error_handling import raise_for_upstream
+
+logger = logging.getLogger(__name__)
+
+LATEST_PATH = "/v1/latest"
+
+
+def raise_for_metals_status(data: dict, where: str) -> None:
+    if data.get("status") == "success" and "metals" in data:
+        return
+
+    e = data.get("error_code")
+    message = data.get("error_message")
+    logger.error("Upstream error: %s -> %s code:%s", where, message, e)
+    if e == 1203:
+        raise ProviderRejected(f"{where}: {message}")
+    raise UpstreamUnavailable(f"{where}: {message}")
 
 
 class MetalsDevClient:
@@ -21,7 +44,17 @@ class MetalsDevClient:
             raise UpstreamUnavailable(f"Metals.Dev unreachable: {url}") from e
 
         raise_for_upstream(r)
+
         return r.json()
 
     def get_latest_metals(self) -> dict:
-        return self._get(f"{self.baseurl}/v1/latest", {"unit": "g", "currency": "USD"})
+        try:
+            data = self._get(
+                f"{self.baseurl}{LATEST_PATH}", {"unit": "g", "currency": "USD"}
+            )
+        except AssetNotFound as e:
+            raise UpstreamUnavailable(f"Metals.Dev endpoint missing: {e}") from e
+
+        raise_for_metals_status(data, where=LATEST_PATH)
+
+        return data
