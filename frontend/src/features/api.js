@@ -21,6 +21,15 @@ export function fetchStockSearchBackup(query, options = {}) {
   return request(`/stock/search/backup/${query}`, options);
 }
 
+//metal
+export function fetchMetalPrice(key, options = {}) {
+  return request(`/metal/price/${key}`, options);
+}
+
+export function fetchMetalSupported(options = {}) {
+  return request(`/metal/supported`, options);
+}
+
 //currency
 export function fetchCurrencyRate(baseCurrency, options = {}) {
   return request(`/currency/rates/${baseCurrency}`, options);

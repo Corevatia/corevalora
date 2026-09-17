@@ -8,6 +8,8 @@ function ResultRow({ result, onSelect }) {
         name={result.name}
         symbol={result.symbol}
         rank={result.rank}
+        exchange={result.exchange}
+        mic={result.mic}
       />
       <button
         className="bg-mist-100 hover:bg-mist-300 dark:bg-mist-700 dark:hover:bg-mist-900 text-neutral-900 dark:text-white font-bold py-2 px-4 rounded-2xl"
@@ -19,21 +21,16 @@ function ResultRow({ result, onSelect }) {
   );
 }
 
-export default function CryptoSearchResults({
-  searchdata,
-  loading,
-  error,
-  onSelect,
-}) {
+export default function ResultList({ results, loading, error, onSelect }) {
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Could not load results.</p>;
+  if (!results || results.length === 0) return <p>No results found.</p>;
+
   return (
-    <div>
-      <h2 className="pt-0.5">SearchResults:</h2>
-      {loading && <p>Loading...</p>}
-      {error && <p>Error</p>}
-      {!error &&
-        searchdata?.map((r) => (
-          <ResultRow key={r.symbol} result={r} onSelect={onSelect} />
-        ))}
-    </div>
+    <>
+      {results.map((r) => (
+        <ResultRow key={r.key} result={r} onSelect={onSelect} />
+      ))}
+    </>
   );
 }

@@ -12,6 +12,8 @@ import {
   fetchHoldings,
   deleteHolding,
   fetchCryptoSearch,
+  fetchMetalPrice,
+  fetchMetalSupported,
   saveTransaction,
 } from "./api";
 
@@ -101,16 +103,33 @@ function useMutation(mutationFn) {
   return { mutate, loading, error };
 }
 
-export const useCryptoprice = (name) => useFetch(fetchCryptoPrice, name);
+export const useCryptoPrice = (name) => useFetch(fetchCryptoPrice, name);
 
 export const useCryptoSearch = (query) => useFetch(fetchCryptoSearch, query);
 
-export const useStockprice = (symbol) => useFetch(fetchStockEOD, symbol);
+export const useStockPrice = (symbol) => useFetch(fetchStockEOD, symbol);
 
 export const useStockSearch = (query) => useFetch(fetchStockSearch, query);
 
 export const useStockSearchBackup = (query, enabled = false) =>
   useFetch(fetchStockSearchBackup, query, enabled);
+
+export const useMetalPrice = (key) => useFetch(fetchMetalPrice, key);
+
+export function useMetals() {
+  const { data, loading, error } = useQuery(fetchMetalSupported);
+  return { metals: data, loading, error };
+}
+
+export function useAssetPrice(kind, key) {
+  const crypto = useCryptoPrice(kind === "crypto" ? key : null);
+  const stock = useStockPrice(kind === "stock" ? key : null);
+  const metal = useMetalPrice(kind === "metal" ? key : null);
+
+  if (kind === "crypto") return crypto;
+  if (kind === "stock") return stock;
+  return metal;
+}
 
 export const useCurrencyRate = (baseCurrency) =>
   useFetch(fetchCurrencyRate, baseCurrency);

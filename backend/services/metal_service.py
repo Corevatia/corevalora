@@ -13,7 +13,7 @@ from services.providers.metalsdev_client import MetalsDevClient
 
 logger = logging.getLogger(__name__)
 
-client = MetalsDevClient(api_key=settings.METALS_DEV_API_KEY)
+client = MetalsDevClient(api_key=settings.METAL_DEV_API_KEY)
 
 
 SUPPORTED_METALS = {

@@ -5,12 +5,9 @@ export default function PortfolioStats({
   holdings,
   rates,
   currency,
-  onCurrencyChange,
   ratesLoading,
   ratesError,
 }) {
-  const currencies = rates.map((r) => r.exchange_currency);
-
   const totals = holdings.reduce(
     (acc, h) => {
       const invested = convert(h.avg_price * h.amount, h.currency, rates);
@@ -34,14 +31,6 @@ export default function PortfolioStats({
     <div style={{ padding: 16, fontFamily: "system-ui" }}>
       {ratesLoading && <p>Loading...</p>}
       {ratesError && <p>ERROR</p>}
-      <select
-        value={currency}
-        onChange={(e) => onCurrencyChange(e.target.value)}
-      >
-        {currencies.map((c) => (
-          <option key={c}>{c}</option>
-        ))}
-      </select>
       <div className="flex flex-col gap-2 pt-5 text-lg">
         <p>Invested: {formatPrice(totals.invested, currency)}</p>
         <p>Portfolio Value: {formatPrice(totals.value, currency)}</p>

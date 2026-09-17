@@ -1,6 +1,4 @@
 import Portfolio from "../components/portfolio/Portfolio";
-import CryptoSearch from "../components/crypto/CryptoSearch";
-import StockSearch from "../components/stock/StockSearch";
 import PortfolioStats from "../components/portfolio/PortfolioStats";
 import {
   useHoldings,
@@ -9,10 +7,7 @@ import {
 } from "../features/hooks";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 
-const column = "min-w-0 flex-1 max-w-100 overflow-y-auto";
-
-export function Dashboard() {
-  const [mode, setMode] = useLocalStorage("cv:mode", "stock");
+export function Dashboard({ onAddTransaction }) {
   const [currency, setCurrency] = useLocalStorage("cv:currency", "EUR");
 
   const { holdings, loading, error, refetch } = useHoldings();
@@ -24,6 +19,7 @@ export function Dashboard() {
   } = useCurrencyRate(currency);
 
   const rates = ratedata?.rates ?? [];
+  const currencies = rates.map((r) => r.exchange_currency);
 
   async function handleDelete(id) {
     try {
@@ -37,46 +33,46 @@ export function Dashboard() {
   const items = holdings ?? [];
 
   return (
-    <div className="flex h-screen justify-center divide-x divide-neutral-300 dark:divide-neutral-700">
-      <div className={`${column} p-1.5`}>
-        <div className="flex items-center gap-3 justify-content ">
-          <h2 className="text-3xl font-extrabold p-2">Dashboard</h2>
+    <div className=" gap-2 p-2">
+      <select
+        className="fixed top-4 left-4"
+        value={currency}
+        onChange={(e) => setCurrency(e.target.value)}
+      >
+        {currencies.map((c) => (
+          <option key={c}>{c}</option>
+        ))}
+      </select>
+      <div className="flex justify-center">
+        <div className="flex w-full max-w-xl flex-col p-4 pb-24">
+          <h2 className="text-center p-2 text-4xl font-extrabold">Dashboard</h2>
+          <PortfolioStats
+            holdings={items}
+            rates={rates}
+            currency={currency}
+            ratesLoading={ratesLoading}
+            ratesError={ratesError}
+          />
+          <div className="border-t border-neutral-300 dark:border-neutral-700">
+            {loading && <p className="p-4">Loading...</p>}
+            {error && <p className="p-4">Could not load holdings</p>}
+            <Portfolio
+              holdings={items}
+              rates={rates}
+              currency={currency}
+              onDelete={handleDelete}
+            />
+          </div>
         </div>
-        <div className="pt-9 flex justify-center">
-          <select
-            value={mode}
-            onChange={(e) => setMode(e.target.value)}
-            className="p-1.5 px-7 text-lg"
-          >
-            <option value="crypto">Crypto</option>
-            <option value="stock">Stocks</option>
-          </select>
-        </div>
-        {mode === "crypto" ? (
-          <CryptoSearch onSaved={refetch} />
-        ) : (
-          <StockSearch onSaved={refetch} />
-        )}
-      </div>
-      <div className={column}>
-        {loading && <p className="p-4">Loading...</p>}
-        {error && <p className="p-4">Could not load holdings</p>}
-        <Portfolio
-          holdings={items}
-          rates={rates}
-          currency={currency}
-          onDelete={handleDelete}
-        />
-      </div>
-      <div className={column}>
-        <PortfolioStats
-          holdings={items}
-          rates={rates}
-          currency={currency}
-          onCurrencyChange={setCurrency}
-          ratesLoading={ratesLoading}
-          ratesError={ratesError}
-        />
+
+        <button
+          type="button"
+          aria-label="Add transaction"
+          onClick={onAddTransaction}
+          className="fixed right-6 bottom-6 flex h-14 w-14 items-center justify-center rounded-full bg-mist-700 text-3xl text-white shadow-lg hover:bg-mist-900 dark:bg-mist-300 dark:text-neutral-900 dark:hover:bg-mist-100"
+        >
+          +
+        </button>
       </div>
     </div>
   );

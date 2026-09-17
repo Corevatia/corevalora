@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     MARKETSTACK_API_KEY: str
     COINCAP_API_KEY: str
-    METALS_DEV_API_KEY: str
+    METAL_DEV_API_KEY: str
     MOCK_DATA: bool = False
     UPSTREAM_DEBUG: bool = False
     LOGGING_LEVEL: str = "INFO"
