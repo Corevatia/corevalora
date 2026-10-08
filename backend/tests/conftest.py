@@ -100,6 +100,7 @@ def holding(db, user):
         asset="Bitcoin",
         symbol="BTC",
         kind="crypto",
+        variant="",
         transactions=[
             models.Transaction(
                 side="buy", amount=2.5, price=40000, traded_on=date(2026, 1, 15)
@@ -119,6 +120,7 @@ def other_holding(db, other_user):
         asset="Ethereum",
         symbol="ETH",
         kind="crypto",
+        variant="",
         transactions=[
             models.Transaction(
                 side="buy", amount=5, price=2000, traded_on=date(2026, 1, 15)

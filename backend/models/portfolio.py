@@ -8,6 +8,8 @@ class TransactionIn(BaseModel):
     asset: str
     key: str
     symbol: str
+    unit: str | None = None
+    custom_name: str | None = None
     kind: Literal["stock", "crypto", "metal"]
     side: Literal["buy", "sell"]
     amount: float = Field(gt=0)
@@ -40,6 +42,9 @@ class HoldingOut(BaseModel):
     kind: str
     amount: float
     avg_price: float
+    variant: str
+    unit: str | None = None
+    custom_name: str | None = None
     price: float | None = None
     currency: str | None = None
     exchange: str | None = None

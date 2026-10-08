@@ -60,6 +60,9 @@ class Holding(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     asset: Mapped[str] = mapped_column(String(255))
     symbol: Mapped[str] = mapped_column(String(10))
+    unit: Mapped[str] = mapped_column(String(10), nullable=True)
+    custom_name: Mapped[str] = mapped_column(String(255), nullable=True)
+    variant: Mapped[str] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -72,7 +75,7 @@ class Holding(Base):
         order_by="Transaction.traded_on, Transaction.id",
     )
 
-    __table_args__ = (UniqueConstraint("user_id", "key", "kind"),)
+    __table_args__ = (UniqueConstraint("user_id", "key", "kind", "variant"),)
 
 
 class Transaction(Base):
