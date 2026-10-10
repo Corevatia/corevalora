@@ -1,6 +1,5 @@
 import { formatDateTime, formatPrice } from "../../lib/format";
 import s from "./Holding.module.css";
-import c from "../shared/card.module.css";
 
 export default function Holding({
   asset,
@@ -19,7 +18,7 @@ export default function Holding({
   const gain = value != null && invested != null ? value - invested : null;
   const gainColor = gain != null && gain >= 0 ? "green" : "red";
   return (
-    <div className={c.card}>
+    <div className="p-4 mb-3 border border-card-border rounded-lg bg-card-bg">
       {stale && <p className={s.stale}>Couldn't get the current price</p>}
 
       <div className={s.headline}>

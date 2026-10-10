@@ -60,7 +60,13 @@ export default function Search({ onClose }) {
     <div className="flex justify-center">
       <div className="flex w-full max-w-xl flex-col gap-3 p-4">
         <div className="flex items-center justify-between">
-          <h2 className="p-2 text-3xl font-extrabold">Add Holding</h2>
+          <button
+            type="button"
+            onClick={() => setSelectedKey(null)}
+            className="pb-2 font-semibold hover:underline"
+          >
+            ← Back to results
+          </button>
           <button
             type="button"
             aria-label="Cancel"
@@ -69,6 +75,11 @@ export default function Search({ onClose }) {
           >
             ✕
           </button>
+        </div>
+        <div>
+          <h2 className="text-center p-1 text-3xl font-extrabold">
+            Add Holding
+          </h2>
         </div>
         <SearchBar
           inputValue={inputValue}
@@ -80,13 +91,6 @@ export default function Search({ onClose }) {
 
         {selectedKey ? (
           <div>
-            <button
-              type="button"
-              onClick={() => setSelectedKey(null)}
-              className="pb-2 font-semibold hover:underline"
-            >
-              ← Back to results
-            </button>
             <AddHoldingForm
               data={data}
               loading={loading}
