@@ -1,13 +1,9 @@
-import { convert } from "../../lib/money.js";
+import { holdingTotals } from "../../lib/money.js";
 import Holding from "../portfolio/Holding.jsx";
 
 export default function Portfolio({ holdings, rates, currency, onDelete }) {
   const rows = holdings
-    .map((h) => ({
-      holding: h,
-      value: convert((h.price ?? 0) * h.amount, h.currency, rates),
-      invested: convert(h.avg_price * h.amount, h.currency, rates),
-    }))
+    .map((h) => ({ holding: h, ...holdingTotals(h, rates) }))
     .sort((a, b) => (b.value ?? -Infinity) - (a.value ?? -Infinity));
   return (
     <div style={{ padding: 12, fontFamily: "system-ui" }}>
@@ -16,8 +12,10 @@ export default function Portfolio({ holdings, rates, currency, onDelete }) {
         <Holding
           key={h.id}
           asset={h.asset}
+          customName={h.custom_name}
           symbol={h.symbol}
           amount={h.amount}
+          unit={h.unit}
           date={h.price_date}
           avgPrice={h.avg_price}
           nativeCurrency={h.currency}

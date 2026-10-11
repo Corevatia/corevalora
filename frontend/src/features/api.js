@@ -71,13 +71,35 @@ export function fetchHoldings(options = {}) {
 }
 
 export function saveTransaction(
-  { asset, key, symbol, kind, side, amount, price, traded_on },
+  {
+    asset,
+    key,
+    symbol,
+    kind,
+    unit,
+    custom_name,
+    side,
+    amount,
+    price,
+    traded_on,
+  },
   options = {},
 ) {
   return request(`/portfolio/transactions`, {
     ...options,
     method: "POST",
-    json: { asset, key, symbol, kind, side, amount, price, traded_on },
+    json: {
+      asset,
+      key,
+      symbol,
+      kind,
+      unit,
+      custom_name,
+      side,
+      amount,
+      price,
+      traded_on,
+    },
   });
 }
 

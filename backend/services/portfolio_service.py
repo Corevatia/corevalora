@@ -111,8 +111,7 @@ def _safe_enrich_holding(
 
 
 def add_transaction(data: TransactionIn, user: User, db: Session) -> HoldingOut:
-    variant = (data.custom_name or "").strip().lower()
-    holding = _find_position(data, variant, user, db)
+    holding = _find_position(data, user, db)
     transaction = Transaction(
         side=data.side,
         amount=data.amount,
@@ -133,7 +132,7 @@ def add_transaction(data: TransactionIn, user: User, db: Session) -> HoldingOut:
             kind=data.kind,
             unit=data.unit,
             custom_name=data.custom_name,
-            variant=variant,
+            variant=data.variant,
         )
         db.add(holding)
 
@@ -146,15 +145,13 @@ def add_transaction(data: TransactionIn, user: User, db: Session) -> HoldingOut:
     return _enrich_holding(holding, db, amount, avg_price)
 
 
-def _find_position(
-    data: TransactionIn, variant: str, user: User, db: Session
-) -> Holding | None:
+def _find_position(data: TransactionIn, user: User, db: Session) -> Holding | None:
     return db.execute(
         select(Holding).where(
             Holding.user_id == user.id,
             Holding.key == data.key,
             Holding.kind == data.kind,
-            Holding.variant == variant,
+            Holding.variant == data.variant,
         )
     ).scalar_one_or_none()
 

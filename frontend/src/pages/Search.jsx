@@ -1,5 +1,9 @@
 import { useState } from "react";
-import { useAssetPrice, useSaveTransaction } from "../features/hooks";
+import {
+  useAssetPrice,
+  useHoldings,
+  useSaveTransaction,
+} from "../features/hooks";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { SearchBar } from "../components/shared/SearchBar";
 import AddHoldingForm from "../components/shared/AddHoldingForm";
@@ -7,6 +11,8 @@ import SearchTabs from "../components/search/SearchTabs";
 import StockResults from "../components/search/StockResults";
 import CryptoResults from "../components/search/CryptoResults";
 import MetalResults from "../components/search/MetalResults";
+import MetalVariantMenu from "../components/search/MetalVariantMenu";
+import NewMetalHolding from "../components/search/NewMetalHolding";
 
 const RESULTS = {
   stock: StockResults,
@@ -18,23 +24,67 @@ export default function Search({ onClose }) {
   const [kind, setKind] = useLocalStorage("search-kind", "stock");
   const [inputValue, setInputValue] = useState("");
   const [query, setQuery] = useState("");
+  const [step, setStep] = useState("results");
   const [selectedKey, setSelectedKey] = useState(null);
+  const [draft, setDraft] = useState(null);
 
   const { data, loading, error } = useAssetPrice(kind, selectedKey);
   const { save, error: saveError } = useSaveTransaction();
+  const {
+    holdings,
+    loading: holdingsLoading,
+    error: holdingsError,
+  } = useHoldings();
 
   const Results = RESULTS[kind];
+  const variants = (holdings ?? []).filter(
+    (holding) => holding.kind === "metal" && holding.key === selectedKey,
+  );
+
+  function resetToResults() {
+    setStep("results");
+    setSelectedKey(null);
+    setDraft(null);
+  }
 
   function handleKindChange(nextKind) {
     setKind(nextKind);
-    setSelectedKey(null);
+    resetToResults();
   }
 
   function onKeyDown(e) {
     if (e.key === "Enter") {
       setQuery(inputValue.trim().toLowerCase());
-      setSelectedKey(null);
+      resetToResults();
     }
+  }
+
+  function handleSelect(key) {
+    setSelectedKey(key);
+    setStep(kind === "metal" ? "variants" : "form");
+  }
+
+  function handlePickVariant(holding) {
+    setDraft({ customName: holding.customName, unit: holding.unit });
+    setStep("form");
+  }
+
+  function handleNewVariant(newDraft) {
+    setDraft(newDraft);
+    setStep("form");
+  }
+
+  function handleBack() {
+    if (step === "new") {
+      setStep("variants");
+      return;
+    }
+    if (step === "form" && kind === "metal") {
+      setDraft(null);
+      setStep("variants");
+      return;
+    }
+    resetToResults();
   }
 
   async function handleConfirm({ side, amount, price, tradedOn }) {
@@ -45,6 +95,8 @@ export default function Search({ onClose }) {
         key: data.key,
         symbol: data.symbol,
         kind,
+        unit: draft?.unit,
+        custom_name: draft?.customName,
         side,
         amount,
         price,
@@ -62,10 +114,10 @@ export default function Search({ onClose }) {
         <div className="flex items-center justify-between">
           <button
             type="button"
-            onClick={() => setSelectedKey(null)}
+            onClick={handleBack}
             className="pb-2 font-semibold hover:underline"
           >
-            ← Back to results
+            ← Back
           </button>
           <button
             type="button"
@@ -89,17 +141,32 @@ export default function Search({ onClose }) {
 
         <SearchTabs kind={kind} onChange={handleKindChange} />
 
-        {selectedKey ? (
-          <div>
-            <AddHoldingForm
-              data={data}
-              loading={loading}
-              error={error}
-              onConfirm={handleConfirm}
-            />
-          </div>
-        ) : (
-          <Results query={query} onSelect={setSelectedKey} />
+        {step === "results" && (
+          <Results query={query} onSelect={handleSelect} />
+        )}
+        {step === "variants" && (
+          <MetalVariantMenu
+            variants={variants}
+            loading={holdingsLoading}
+            error={holdingsError}
+            onPick={handlePickVariant}
+            onCreate={() => setStep("new")}
+          />
+        )}
+
+        {step === "new" && (
+          <NewMetalHolding variants={variants} onSubmit={handleNewVariant} />
+        )}
+
+        {step === "form" && (
+          <AddHoldingForm
+            data={data}
+            unit={draft?.unit}
+            customName={draft?.customName}
+            loading={loading}
+            error={error}
+            onConfirm={handleConfirm}
+          />
         )}
 
         {saveError && (

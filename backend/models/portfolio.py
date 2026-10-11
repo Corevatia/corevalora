@@ -23,6 +23,17 @@ class TransactionIn(BaseModel):
             raise ValueError("Trade date cannot be in the future")
         return value
 
+    @field_validator("custom_name")
+    @classmethod
+    def blank_custom_name_to_none(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        return value.strip() or None
+
+    @property
+    def variant(self) -> str:
+        return (self.custom_name or "").lower()
+
 
 class TransactionOut(BaseModel):
     id: int

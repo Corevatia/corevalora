@@ -1,23 +1,44 @@
 import { useState } from "react";
 import { formatDateTime, formatPrice } from "../../lib/format";
+import { unitPrice } from "../../lib/units.js";
 
 function today() {
   return new Date().toISOString().split("T")[0];
 }
 
-export default function AddHoldingForm({ data, loading, error, onConfirm }) {
+function priceInput(value) {
+  return String(Number(value.toPrecision(12)));
+}
+
+export default function AddHoldingForm({
+  data,
+  unit,
+  customName,
+  loading,
+  error,
+  onConfirm,
+}) {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Sorry, something went wrong</p>;
   if (!data) return null;
   return (
-    <AddHoldingFormReady key={data.symbol} data={data} onConfirm={onConfirm} />
+    <AddHoldingFormReady
+      key={`${data.key}-${customName ?? ""}-${unit ?? ""}`}
+      data={data}
+      unit={unit}
+      customName={customName}
+      onConfirm={onConfirm}
+    />
   );
 }
 
-function AddHoldingFormReady({ data, onConfirm }) {
+function AddHoldingFormReady({ data, unit, customName, onConfirm }) {
+  const marketPrice = unitPrice(data.price, unit);
+  const perUnit = unit ? ` / ${unit}` : "";
+
   const [side, setSide] = useState("buy");
   const [amount, setAmount] = useState("");
-  const [price, setPrice] = useState(String(data.price));
+  const [price, setPrice] = useState(priceInput(marketPrice));
   const [tradedOn, setTradedOn] = useState(today());
 
   const inputClass = "border border-gray-300 rounded-md px-2 py-1 text-sm";
@@ -33,9 +54,13 @@ function AddHoldingFormReady({ data, onConfirm }) {
 
   return (
     <div>
-      <h3 className="text-xl font-bold">{data.name}</h3>
+      <h3 className="text-xl font-bold">{customName ?? data.name}</h3>
+      {customName && <p>{data.name}</p>}
       <p>Symbol: {data.symbol}</p>
-      <p>Market price: {formatPrice(data.price, data.currency)}</p>
+      <p>
+        Market price: {formatPrice(marketPrice, data.currency)}
+        {perUnit}
+      </p>
       <p>Last Update: {formatDateTime(data.date)}</p>
       {data.exchange && <p>Exchange: {data.exchange}</p>}
       <div className="pt-3">
@@ -63,6 +88,7 @@ function AddHoldingFormReady({ data, onConfirm }) {
             className={inputClass}
           />{" "}
           {data.currency}
+          {perUnit}
         </label>
       </div>
       <div className="pt-1">
@@ -77,7 +103,8 @@ function AddHoldingFormReady({ data, onConfirm }) {
             onChange={(e) => setAmount(e.target.value)}
             placeholder="Amount (e.g. 0.5)"
             className={inputClass}
-          />
+          />{" "}
+          {unit}
         </label>
       </div>
       <div className="pt-1">

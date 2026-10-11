@@ -1,5 +1,5 @@
 import { formatPrice } from "../../lib/format";
-import { convert } from "../../lib/money";
+import { holdingTotals } from "../../lib/money";
 
 export default function PortfolioStats({
   holdings,
@@ -10,9 +10,7 @@ export default function PortfolioStats({
 }) {
   const totals = holdings.reduce(
     (acc, h) => {
-      const invested = convert(h.avg_price * h.amount, h.currency, rates);
-
-      const value = convert((h.price ?? 0) * h.amount, h.currency, rates);
+      const { invested, value } = holdingTotals(h, rates);
 
       if (invested == null || value == null) return acc;
       acc.invested += invested;

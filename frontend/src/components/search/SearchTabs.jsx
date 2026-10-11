@@ -16,7 +16,7 @@ export default function SearchTabs({ kind, onChange }) {
         const selected = tab.kind === kind;
         return (
           <button
-            key={tab.id}
+            key={tab.kind}
             type="button"
             aria-pressed={selected}
             onClick={() => onChange(tab.kind)}
