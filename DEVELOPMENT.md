@@ -20,9 +20,9 @@ Just want to run the app? `docker compose up` needs none of this — see the
 > (`/home/you/…`) rather than under `/mnt/c`. File-watching doesn't work reliably
 > across that boundary, so hot-reload stops working without telling you.
 
-The **frontend** has its own optional `frontend/.env` (`VITE_API_URL`). You only
-need it if the backend isn't at the default `http://localhost:8000`; otherwise
-skip it (`cp frontend/.env.example frontend/.env` to override).
+The **frontend** reads the same root `.env` (`envDir` in `vite.config.js`), but
+only sees the `VITE_*` variables, so backend secrets never reach the bundle.
+Set `VITE_API_URL` there only if the backend isn't at the default `http://localhost:8000`.
 
 ## Run
 

@@ -25,7 +25,9 @@ class Settings(BaseSettings):
     MAINTENANCE_LOOP_HOURS: int | None = 6
 
     model_config = SettingsConfigDict(
-        env_file=Path(__file__).resolve().parents[2] / ".env", env_file_encoding="utf-8"
+        env_file=Path(__file__).resolve().parents[2] / ".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
     )
 
     @property

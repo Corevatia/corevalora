@@ -6,6 +6,7 @@ export default function CryptoResults({ query, onSelect }) {
 
   return (
     <ResultList
+      kind="crypto"
       results={data}
       loading={loading}
       error={error}

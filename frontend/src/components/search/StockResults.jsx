@@ -21,6 +21,7 @@ export default function StockResults({ query, onSelect }) {
   return (
     <div>
       <ResultList
+        kind="stock"
         results={data}
         loading={loading}
         error={error}
@@ -28,6 +29,7 @@ export default function StockResults({ query, onSelect }) {
       />
       {extendend ? (
         <ResultList
+          kind="stock"
           results={backup}
           loading={backupLoading}
           error={backupError}

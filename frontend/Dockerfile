@@ -4,8 +4,10 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-ARG VITE_API_URL=https://localhost:8000
+ARG VITE_API_URL=http://localhost:8000
 ENV VITE_API_URL=$VITE_API_URL
+ARG VITE_BRANDFETCH_CLIENT_ID
+ENV VITE_BRANDFETCH_CLIENT_ID=$VITE_BRANDFETCH_CLIENT_ID
 
 COPY . .
 RUN npm run build

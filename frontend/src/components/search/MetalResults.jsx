@@ -15,6 +15,7 @@ export default function MetalResults({ query, onSelect }) {
 
   return (
     <ResultList
+      kind="metal"
       results={results}
       loading={loading}
       error={error}

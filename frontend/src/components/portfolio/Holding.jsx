@@ -1,8 +1,9 @@
 import { formatDateTime, formatPrice } from "../../lib/format";
-import s from "./Holding.module.css";
+const CLIENT_ID = import.meta.env.VITE_BRANDFETCH_CLIENT_ID;
 
 export default function Holding({
   asset,
+  kind,
   customName,
   symbol,
   amount,
@@ -18,42 +19,77 @@ export default function Holding({
   onDelete,
 }) {
   const gain = value != null && invested != null ? value - invested : null;
-  const gainColor = gain != null && gain >= 0 ? "green" : "red";
+  const gainColor =
+    gain != null && gain >= 0 ? "text-green-600" : "text-red-600";
   const perUnit = unit ? ` / ${unit}` : "";
   return (
     <div className="p-4 mb-3 border border-card-border rounded-lg bg-card-bg">
-      {stale && <p className={s.stale}>Couldn't get the current price</p>}
-
-      <div className={s.headline}>
-        <h3 className={s.asset}>{customName ?? asset}</h3>
-        <span className={s.value}>
-          {value != null ? formatPrice(value, currency) : "—"}
-        </span>
-      </div>
-      {customName && (
-        <p className="text-sm text-neutral-500 dark:text-neutral-400">
-          {asset}
+      {stale && (
+        <p className="mb-2 text-sm text-red-600">
+          Couldn't get the current price
         </p>
       )}
-      <p className={s.gain} style={{ color: gainColor }}>
-        {gain != null ? formatPrice(gain, currency) : "—"}
-      </p>
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+        {kind === "stock" && (
+          <img
+            src={`https://cdn.brandfetch.io/ticker/${symbol}?c=${CLIENT_ID}`}
+            alt="Logo by Brandfetch"
+            className="w-12 h-12 rounded-full"
+          />
+        )}
+        {kind === "crypto" && (
+          <img
+            src={`https://cdn.brandfetch.io/crypto/${symbol}?c=${CLIENT_ID}`}
+            alt="Logo by Brandfetch"
+            className="w-12 h-12 rounded-full"
+          />
+        )}
+        {kind === "metal" && (
+          // backend will eventually provide logos for metals as well
+          <img className="w-12 h-12 rounded-full" />
+        )}
+        <div className="min-w-0 self-start text-center">
+          <h3 className="text-xl font-bold leading-tight wrap-break-words">
+            {customName ?? asset}
+          </h3>
+          {customName && (
+            <p className="text-sm text-neutral-500 dark:text-neutral-400">
+              {asset}
+            </p>
+          )}
+        </div>
+        <div className="self-start pt-1 text-right whitespace-nowrap">
+          <p className="font-semibold">
+            {value != null ? formatPrice(value, currency) : "—"}
+          </p>
+          <p className={`text-sm font-semibold ${gainColor}`}>
+            {gain != null ? formatPrice(gain, currency) : "—"}
+          </p>
+        </div>
+      </div>
 
-      <details className={s.details}>
-        <summary>Details</summary>
-        <p>Symbol: {symbol}</p>
-        <p>
-          Amount: {amount} {unit}
-        </p>
-        <p>
-          Avg Price: {formatPrice(avgPrice, nativeCurrency)}
-          {perUnit}
-        </p>
-        <p>Last Update: {formatDateTime(date)}</p>
-        {exchange && <p>Exchange: {exchange}</p>}
-      </details>
-      <div className={s.footer}>
-        <button className={s.delete} onClick={onDelete}>
+      <div className="mt-2 flex items-start justify-between gap-3">
+        <details className="text-sm">
+          <summary className="cursor-pointer select-none text-card-border">
+            Details
+          </summary>
+          <div className="mt-1 space-y-1">
+            <p>Symbol: {symbol}</p>
+            <p>
+              Amount: {amount} {unit}
+            </p>
+            <p>
+              Avg Price: {formatPrice(avgPrice, nativeCurrency)}
+              {perUnit}
+            </p>
+            <p>Last Update: {formatDateTime(date)}</p>
+            {exchange && <p>Exchange: {exchange}</p>}
+          </div>
+        </details>
+        <button
+          className="shrink-0 cursor-pointer px-3 py-1 text-sm border border-card-border rounded-md text-red-600 hover:bg-red-600 hover:text-white"
+          onClick={onDelete}
+        >
           delete
         </button>
       </div>

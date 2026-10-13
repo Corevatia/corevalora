@@ -12,6 +12,7 @@ export default function Portfolio({ holdings, rates, currency, onDelete }) {
         <Holding
           key={h.id}
           asset={h.asset}
+          kind={h.kind}
           customName={h.custom_name}
           symbol={h.symbol}
           amount={h.amount}

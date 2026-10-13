@@ -112,13 +112,15 @@ export default function Search({ onClose }) {
     <div className="flex justify-center">
       <div className="flex w-full max-w-xl flex-col gap-3 p-4">
         <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="pb-2 font-semibold hover:underline"
-          >
-            ← Back
-          </button>
+          {step !== "results" && (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="pb-2 font-semibold hover:underline"
+            >
+              ← Back
+            </button>
+          )}
           <button
             type="button"
             aria-label="Cancel"
