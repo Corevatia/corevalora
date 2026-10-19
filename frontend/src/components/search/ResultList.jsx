@@ -1,20 +1,26 @@
+import { useState } from "react";
 import SearchResult from "../shared/SearchResult";
-const CLIENT_ID = import.meta.env.VITE_BRANDFETCH_CLIENT_ID;
+import { cryptoLogoUrl, stockLogoUrl } from "../../lib/logos";
 
-function ResultRow({ kind, result, onSelect }) {
+function ResultRow({ kind, result, onSelect, unverified }) {
+  const [logoMissing, setLogoMissing] = useState(false);
+
   return (
     <div className="relative p-4 mb-3 border border-card-border rounded-lg bg-card-bg ">
-      <div className="flex items-center min-h-20">
-        {kind === "stock" && (
+      <div
+        className={`flex items-center min-h-20 ${unverified ? "opacity-60" : ""}`}
+      >
+        {kind === "stock" && !logoMissing && (
           <img
-            src={`https://cdn.brandfetch.io/ticker/${result.symbol}?c=${CLIENT_ID}`}
+            src={stockLogoUrl(result.symbol)}
             alt="Logo by Brandfetch"
             className="absolute left-4 top-4 w-20 h-20 rounded-full"
+            onError={() => setLogoMissing(true)}
           />
         )}
         {kind === "crypto" && (
           <img
-            src={`https://cdn.brandfetch.io/crypto/${result.symbol}?c=${CLIENT_ID}`}
+            src={cryptoLogoUrl(result.symbol)}
             alt="Logo by Brandfetch"
             className="absolute left-4 top-4 w-20 h-20 rounded-full"
           />
@@ -29,7 +35,12 @@ function ResultRow({ kind, result, onSelect }) {
           />
         </div>
       </div>
-      <div className="mt-1 flex justify-end">
+      <div className="mt-1 flex items-center justify-end">
+        {unverified && (
+          <p className="mr-auto text-sm text-neutral-500 dark:text-neutral-400">
+            Not verified by OpenFIGI
+          </p>
+        )}
         <button
           className="bg-mist-100 hover:bg-mist-300 dark:bg-mist-700 dark:hover:bg-mist-900 text-neutral-900 shrink-0 dark:text-white font-bold py-2 px-4 rounded-2xl"
           onClick={() => onSelect(result.key)}
@@ -47,6 +58,7 @@ export default function ResultList({
   loading,
   error,
   onSelect,
+  unverified = false,
 }) {
   if (loading) return <p className="text-center">Loading...</p>;
   if (error) return <p className="text-center">Could not load results.</p>;
@@ -56,7 +68,13 @@ export default function ResultList({
   return (
     <>
       {results.map((r) => (
-        <ResultRow key={r.key} kind={kind} result={r} onSelect={onSelect} />
+        <ResultRow
+          key={r.key}
+          kind={kind}
+          result={r}
+          onSelect={onSelect}
+          unverified={unverified}
+        />
       ))}
     </>
   );

@@ -7,6 +7,8 @@ from core.errors import AssetNotFound, ProviderRejected, UpstreamUnavailable
 from db.models import AssetPriceCache
 from services import stock_service
 from services.cache.price_cache import CACHE_TTL_SECONDS
+from services.cache.search_cache import read_search
+from services.exchanges import figi_filter
 
 
 class FakeClient:
@@ -35,6 +37,94 @@ class FakeClient:
 
     def search_tickers_backup(self, symbol):
         return {"data": [{"name": "Apple Inc"}]}
+
+
+class FakeSearchClient:
+    def __init__(self, symbols):
+        self.symbols = symbols
+
+    def _items(self, ticker_field):
+        return {
+            "data": [
+                {
+                    ticker_field: s,
+                    "name": s,
+                    "has_eod": True,
+                    "stock_exchange": {"name": "SIX Swiss Exchange", "mic": "XSWX"},
+                }
+                for s in self.symbols
+            ]
+        }
+
+    def search_tickers(self, query):
+        return self._items("ticker")
+
+    def search_tickers_backup(self, query):
+        return self._items("symbol")
+
+
+class FakeFigiClient:
+    def __init__(self, answers=None, error=None):
+        self.answers = answers
+        self.error = error
+
+    def map_tickers(self, jobs):
+        if self.error:
+            raise self.error
+        return self.answers
+
+
+FIGI_KNOWN = {"data": [{"figi": "BBG000TEST00"}]}
+FIGI_UNKNOWN = {"warning": "No identifier found."}
+
+
+@pytest.fixture
+def search_setup(monkeypatch):
+    monkeypatch.setattr(settings, "MOCK_DATA", False)
+    monkeypatch.setattr(settings, "OPENFIGI_FILTER", "silent")
+    monkeypatch.setattr(
+        stock_service, "client", FakeSearchClient(["NESN.SW", "NESNE.SW"])
+    )
+
+    def use_figi(fake):
+        monkeypatch.setattr(figi_filter, "client", fake)
+
+    return use_figi
+
+
+@pytest.mark.parametrize(
+    "search, kind",
+    [
+        (stock_service.get_stock_search, "stock"),
+        (stock_service.search_backup, "bstock"),
+    ],
+)
+def test_search_marks_unknown_tickers_and_caches(db, search_setup, search, kind):
+    search_setup(FakeFigiClient([FIGI_KNOWN, FIGI_UNKNOWN]))
+
+    results = search("nestle", db)
+
+    assert [(r.symbol, r.verified) for r in results] == [
+        ("NESN.SW", True),
+        ("NESNE.SW", False),
+    ]
+    cached = read_search(db, kind=kind, query="nestle")
+    assert [(r["symbol"], r["verified"]) for r in cached.results] == [
+        ("NESN.SW", True),
+        ("NESNE.SW", False),
+    ]
+
+
+def test_search_without_openfigi_is_unmarked_and_not_cached(db, search_setup):
+    search_setup(FakeFigiClient(error=UpstreamUnavailable("/v3/mapping -> 503")))
+
+    results = stock_service.get_stock_search("nestle", db)
+
+    assert [(r.symbol, r.verified) for r in results] == [
+        ("NESN.SW", None),
+        ("NESNE.SW", None),
+    ]
+    assert read_search(db, kind="stock", query="nestle") is None
 
 
 def stale_cache_row():

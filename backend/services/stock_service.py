@@ -9,6 +9,7 @@ from core.errors import AssetNotFound, ProviderRejected, UpstreamError
 from services.cache.price_cache import is_fresh, read_price, upsert_price
 from services.cache.search_cache import is_search_fresh, read_search, upsert_search
 from services.exchanges.exchanges import get_exchange_currency
+from services.exchanges.figi_filter import mark_with_figi
 from services.exchanges.search_filter import filter_marketstack_search
 from services.mocks.stock_mock import get_stock_mock, get_stock_search_results_mock
 from services.providers.marketstack_client import MarketStackClient
@@ -28,21 +29,8 @@ def get_stock_search(query: str, db: Session):
 
     data = client.search_tickers(query)
     filtered_data = filter_marketstack_search(data) or []
-    results = [
-        stock.SearchResult(
-            key=e["ticker"],
-            name=e["name"],
-            symbol=e["ticker"],
-            exchange=e["stock_exchange"]["name"],
-            mic=e["stock_exchange"]["mic"],
-        )
-        for e in filtered_data
-    ]
-    upsert_search(
-        db, kind="stock", query=query, results=[r.model_dump() for r in results]
-    )
-
-    return results
+    results = _to_results(filtered_data, ticker_field="ticker")
+    return _mark_and_cache(results, kind="stock", query=query, db=db)
 
 
 def get_price(symbol: str, db: Session) -> stock.Stock:
@@ -125,18 +113,31 @@ def search_backup(query: str, db: Session):
 
     data = client.search_tickers_backup(query)
     filtered_data = filter_marketstack_search(data) or []
-    results = [
+    results = _to_results(filtered_data, ticker_field="symbol")
+
+    return _mark_and_cache(results, kind="bstock", query=query, db=db)
+
+
+def _to_results(data: list[dict], ticker_field: str) -> list[stock.SearchResult]:
+    return [
         stock.SearchResult(
-            key=e["symbol"],
+            key=e[ticker_field],
             name=e["name"],
-            symbol=e["symbol"],
+            symbol=e[ticker_field],
             exchange=e["stock_exchange"]["name"],
             mic=e["stock_exchange"]["mic"],
         )
-        for e in filtered_data
+        for e in data
     ]
-    upsert_search(
-        db, kind="bstock", query=query, results=[r.model_dump() for r in results]
-    )
 
+
+def _mark_and_cache(
+    results: list[stock.SearchResult], *, kind: str, query: str, db: Session
+) -> list[stock.SearchResult]:
+    results, cacheable = mark_with_figi(results, settings.OPENFIGI_FILTER)
+
+    if cacheable:
+        upsert_search(
+            db, kind=kind, query=query, results=[r.model_dump() for r in results]
+        )
     return results

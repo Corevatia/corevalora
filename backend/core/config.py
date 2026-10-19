@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -7,6 +8,8 @@ class Settings(BaseSettings):
     MARKETSTACK_API_KEY: str
     COINCAP_API_KEY: str
     METAL_DEV_API_KEY: str
+    OPENFIGI_API_KEY: str | None = None
+    OPENFIGI_FILTER: Literal["off", "silent", "verbose"] = "verbose"
     MOCK_DATA: bool = False
     UPSTREAM_DEBUG: bool = False
     LOGGING_LEVEL: str = "INFO"

@@ -7,6 +7,7 @@ class SearchResult(BaseModel):
     symbol: str
     exchange: str
     mic: str
+    verified: bool | None = None
 
 
 class Stock(BaseModel):

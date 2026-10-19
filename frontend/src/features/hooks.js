@@ -16,6 +16,7 @@ import {
   fetchMetalSupported,
   saveTransaction,
 } from "./api";
+import { stockLogoUrl } from "../lib/logos";
 
 function useFetch(fetchFn, param, enabled = true) {
   const [state, setState] = useState({
@@ -113,6 +114,49 @@ export const useStockSearch = (query) => useFetch(fetchStockSearch, query);
 
 export const useStockSearchBackup = (query, enabled = false) =>
   useFetch(fetchStockSearchBackup, query, enabled);
+
+const LOGO_TIMEOUT_MS = 1500;
+
+export function useLogoStatus(symbols) {
+  const key = symbols.join(",");
+  const [state, setState] = useState({ key: "", withLogo: new Set() });
+
+  useEffect(() => {
+    if (!key) return;
+
+    const list = key.split(",");
+    const withLogo = new Set();
+    let pending = list.length;
+    let done = false;
+
+    const finish = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      setState({ key, withLogo });
+    };
+    const timer = setTimeout(finish, LOGO_TIMEOUT_MS);
+
+    for (const symbol of list) {
+      const img = new Image();
+      img.onload = () => {
+        withLogo.add(symbol);
+        if (--pending === 0) finish();
+      };
+      img.onerror = () => {
+        if (--pending === 0) finish();
+      };
+      img.src = stockLogoUrl(symbol);
+    }
+
+    return () => {
+      done = true;
+      clearTimeout(timer);
+    };
+  }, [key]);
+  if (!key) return new Set();
+  return state.key === key ? state.withLogo : null;
+}
 
 export const useMetalPrice = (key) => useFetch(fetchMetalPrice, key);
 
